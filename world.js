@@ -176,7 +176,7 @@ function groundY(x,z){ // 현관 단과 돌계단 높이
     box(1.05,.24,1.05,M(0xd9d0bd),x,.72+.12,FZ+2.55);box(1.05,.24,1.05,M(0xd9d0bd),x,.72+3.1+.24,FZ+2.55)});
   const canopyY=.72+3.5;
   box(PW+.6,.35,3.1,M(0xe8e2d4),0,canopyY+.17,FZ+1.95);
-  const signT=ctex(1024,96,(x,w,h)=>{x.fillStyle='#5a3a24';x.fillRect(0,0,w,h);x.fillStyle='#e8c46a';x.textAlign='center';x.textBaseline='middle';fitText(x,'스트레스 해소방  ·  MIND GYM',w*.9,58,DISP);x.fillText('스트레스 해소방  ·  MIND GYM',w/2,h*.56)});
+  const signT=ctex(1024,96,(x,w,h)=>{x.fillStyle='#5a3a24';x.fillRect(0,0,w,h);x.fillStyle='#e8c46a';x.textAlign='center';x.textBaseline='middle';fitText(x,'스트레스 마음정비소',w*.9,62,DISP);x.fillText('스트레스 마음정비소',w/2,h*.56)});
   const fascia=new T.Mesh(new T.PlaneGeometry(PW+.6,.36),new T.MeshBasicMaterial({map:signT}));fascia.position.set(0,canopyY+.17,FZ+3.51);g.add(fascia);
   const reliefT=ctex(1024,160,(x,w,h)=>{stoneDraw(x,w,h,40,[206,196,175]);for(let i=0;i<5;i++){const cx=w*(i+.5)/5,cy=h/2,pw=w/5-36;x.fillStyle='rgba(0,0,0,.25)';x.fillRect(cx-pw/2,22,pw,h-44);x.fillStyle='#d8cdb4';x.fillRect(cx-pw/2+4,26,pw-8,h-52);
       x.strokeStyle='rgba(90,75,55,.6)';x.lineWidth=5;for(let k=0;k<6;k++){const a=k*Math.PI/3;x.beginPath();x.ellipse(cx+Math.cos(a)*18,cy+Math.sin(a)*14,18,9,a,0,7);x.stroke()}x.beginPath();x.arc(cx,cy,9,0,7);x.stroke()}});
@@ -295,9 +295,9 @@ function groundY(x,z){ // 현관 단과 돌계단 높이
   const benchM=M(0xa0703f,{r:.6});[[-4.5,12,1],[4.5,12,-1],[-4.5,21,1],[4.5,21,-1]].forEach(([x,z,s])=>{box(.5,.08,1.6,benchM,x,.45,z);box(.06,.45,1.6,benchM,x-s*.25,.72,z);[-.65,.65].forEach(o=>box(.45,.45,.06,poleM,x,.225,z+o))});
   /* ----- light ----- */
   const sun=new T.DirectionalLight(0xfff4e0,1.0);sun.position.set(-20,40,30);g.add(sun);g.add(new T.AmbientLight(0xdfefff,.3));
-  floors.push({g,elevHits:[],walk:[ground,plaza,path,field],name:'스트레스 해소방 앞',no:'밖',xb:34,zMin:FZ+.9,zMax:30,outside:true,
+  floors.push({g,elevHits:[],walk:[ground,plaza,path,field],name:'스트레스 마음정비소 앞',no:'밖',xb:34,zMin:FZ+.9,zMax:30,outside:true,
     clamp(P){P.x=Math.max(-38,Math.min(36,P.x));P.z=Math.min(30,P.z);const minZ=Math.abs(P.x)<13.6?FZ+.9:-12;if(P.z<minZ)P.z=minZ}});
-  doors.push({id:'__enter',enter:true,r:{title:'스트레스 해소방'},floor:OUT,pivL,pivR,open:0,target:0,front:{x:0,z:FZ+1.6},look:{x:0,z:FZ-1},hits:[L,R,back,fan,arch,fascia]});
+  doors.push({id:'__enter',enter:true,r:{title:'스트레스 마음정비소'},floor:OUT,pivL,pivR,open:0,target:0,front:{x:0,z:FZ+1.6},look:{x:0,z:FZ-1},hits:[L,R,back,fan,arch,fascia]});
 })();
 
 scene.add(new T.HemisphereLight(0xfff3e0,0x3a2c22,.55));scene.add(new T.AmbientLight(0xffffff,.18));
