@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://*.firebaseio.com https://*.firebasedatabase.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app; frame-src https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="robots" content="noindex,nofollow">
+<title>스트레스 해소방 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;700&display=swap">
+<style>
+/* base reset (the Claude page skeleton used to supply this) */
+*,*::before,*::after{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font-size:14px}
+img{max-width:100%}
+/* Layout: a three-floor building directory (hub) — each door opens a full-screen room with a back bar */
+:root{
+  --bg:#12100e;
+  --panel:#1c1815;
+  --line:#352d26;
+  --fg:#f1e7d6;
+  --muted:#a59886;
+  --gold:#e8b23a;
+  --f1:#c4402f;   /* 1층 터뜨리는 방 */
+  --f2:#3f9d8c;   /* 2층 쉬어가는 방 */
+  --f3:#d79a2b;   /* 3층 함께하는 방 */
+  --display:"Black Han Sans","Noto Sans KR",system-ui,sans-serif;
+  --body:"Noto Sans KR",system-ui,-apple-system,sans-serif;
+  --hand:"Nanum Pen Script","Noto Sans KR",cursive;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);-webkit-tap-highlight-color:transparent}
+body.in-room{overflow:hidden}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+button{font-family:inherit}
+
+/* ---------- hub ---------- */
+#hub{max-width:780px;margin:0 auto;box-sizing:border-box;padding-block:22px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:26px}
+.sign{display:flex;flex-direction:column;gap:6px}
+.sign .tag{font-size:11px;letter-spacing:.2em;color:var(--muted)}
+.sign h1{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(38px,9vw,64px);line-height:1;letter-spacing:-.01em;text-wrap:balance}
+.sign h1 span{color:var(--gold)}
+.sign p{margin:4px 0 0;color:var(--muted);font-size:15px;max-width:34em}
+.course{display:flex;flex-direction:column;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.course h2{margin:0;font-size:13px;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;counter-reset:s}
+.step{display:flex;flex-direction:column;gap:2px;padding:10px;border-radius:10px;background:var(--bg);color:var(--fg);text-decoration:none;border:1px solid var(--line);min-width:0}
+.step b{font-size:14px}
+.step small{color:var(--muted);font-size:11px}
+.step i{font-style:normal;font-family:var(--display);color:var(--gold);font-size:13px}
+.floor{display:flex;flex-direction:column;gap:12px}
+.floor-head{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.floor-head .no{font-family:var(--display);font-size:26px;line-height:1;color:var(--c)}
+.floor-head h3{margin:0;font-size:17px}
+.floor-head span{color:var(--muted);font-size:12px;margin-left:auto}
+.doors{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.door{position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:16px;aspect-ratio:3/4;max-width:100%;padding:14px;border-radius:12px 12px 4px 4px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--c) 85%,#000) 0%,color-mix(in srgb,var(--c) 55%,#000) 100%);
+  color:#fff8ec;text-decoration:none;box-shadow:inset 0 0 0 3px rgba(0,0,0,.25),inset 0 -14px 0 rgba(0,0,0,.18);transition:transform .15s}
+.door:hover{transform:translateY(-3px)}
+.door .plate{align-self:flex-start;font-size:10px;letter-spacing:.12em;background:rgba(0,0,0,.35);padding:3px 7px;border-radius:4px;font-variant-numeric:tabular-nums}
+.door .ic{font-size:40px;line-height:1}
+.door b{font-family:var(--display);font-weight:400;font-size:20px;line-height:1.1}
+.door small{display:block;font-size:12px;opacity:.85;margin-top:4px;line-height:1.35}
+.door::after{content:"";position:absolute;right:12px;top:52%;width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 1px 2px rgba(0,0,0,.5)}
+.foot{color:var(--muted);font-size:12px;line-height:1.6;border-top:1px solid var(--line);padding-top:14px}
+
+/* ---------- room shell ---------- */
+#room{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--bg);z-index:5;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.rbar{display:flex;align-items:center;gap:10px;padding-block:10px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.back{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--fg);font-size:13px;font-weight:700;cursor:pointer;flex:none}
+.rtitle{min-width:0;flex:1}
+.rtitle b{display:block;font-family:var(--display);font-weight:400;font-size:20px;line-height:1.1;color:var(--accent,var(--fg));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rtitle small{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon-btn{background:none;border:1px solid var(--line);color:var(--fg);border-radius:8px;width:38px;height:38px;font-size:16px;cursor:pointer;flex:none}
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;padding-bottom:12px;max-width:680px;width:100%;margin:0 auto;box-sizing:border-box;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.rbody.scroll{overflow-y:auto}
+
+/* ---------- shared room parts ---------- */
+.stage{flex:1;min-height:0;position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#000;touch-action:none;user-select:none;-webkit-user-select:none}
+.stage canvas{display:block;width:100%;height:100%;cursor:pointer}
+.hint{position:absolute;left:12px;right:12px;bottom:10px;text-align:center;font-size:13px;color:var(--fg);pointer-events:none;transition:opacity .4s;text-shadow:0 1px 3px #000}
+.hint.call{color:var(--gold);font-weight:700;font-size:15px}
+.badge{position:absolute;top:10px;left:10px;padding:5px 10px;border-radius:999px;background:rgba(0,0,0,.55);font-size:12px;font-variant-numeric:tabular-nums;pointer-events:none}
+.corner{position:absolute;top:10px;right:10px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(20,17,15,.75);color:var(--fg);font-size:12px;cursor:pointer}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.field{flex:1;min-width:0;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);font-family:var(--body);font-size:15px;box-sizing:border-box}
+textarea.field{resize:none;line-height:1.5}
+.btn{padding:10px 14px;border-radius:8px;border:0;background:var(--accent,var(--gold));color:#140f0a;font-weight:700;font-size:14px;cursor:pointer}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--fg)}
+.btn:disabled{opacity:.45;cursor:default}
+.chip{padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--fg);font-size:14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent,var(--gold));border-color:transparent;color:#140f0a;font-weight:700}
+.tabs{display:flex;gap:6px}
+.tab{flex:1;padding:9px 0;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);font-weight:700;font-size:13px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);border-color:transparent;color:#140f0a}
+.note{font-size:12px;color:var(--muted);line-height:1.5}
+.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(10,8,7,.72);text-align:center;padding:16px;box-sizing:border-box}
+.overlay h2{margin:0;font-family:var(--display);font-weight:400;font-size:30px}
+.overlay p{margin:0;color:var(--muted);font-size:14px}
+
+/* ---------- multiplayer ---------- */
+.w-people{position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(84px + env(safe-area-inset-top,0px));padding:7px 12px;border-radius:999px;border:1px solid var(--line);
+  background:rgba(16,13,11,.72);backdrop-filter:blur(6px);color:var(--fg);font-size:13px;cursor:pointer}
+.w-people b{color:#7ee0a8;font-variant-numeric:tabular-nums}
+.w-plist{position:absolute;left:max(16px,env(safe-area-inset-left,0px));top:calc(122px + env(safe-area-inset-top,0px));width:min(260px,calc(100% - 32px));max-height:45vh;overflow:auto;
+  padding:8px;border-radius:12px;background:rgba(16,13,11,.86);backdrop-filter:blur(6px);display:flex;flex-direction:column;gap:2px;font-size:13px}
+.w-plist div{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:8px}
+.w-plist i{width:10px;height:10px;border-radius:50%;flex:none}
+.w-plist span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.w-plist small{color:var(--muted);flex:none}
+.w-emotes{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(3,44px);gap:6px}
+.w-emotes button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:rgba(16,13,11,.72);backdrop-filter:blur(6px);font-size:22px;cursor:pointer}
+.w-say{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(132px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.w-say button{padding:8px 12px;border-radius:999px;border:0;background:#fffaf0;color:#2a2018;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.w-join{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;background:rgba(8,10,14,.55);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.w-card{width:min(360px,100%);display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:16px;background:var(--panel);border:1px solid var(--line);box-shadow:0 20px 50px rgba(0,0,0,.5)}
+.w-card h2{margin:0;font-family:var(--display);font-weight:400;font-size:24px;color:var(--gold)}
+.w-card p{margin:0;font-size:13px;color:var(--muted);line-height:1.5}
+.w-card .chip{font-size:20px;padding:4px 8px}
+.swatch{width:30px;height:30px;border-radius:50%;border:3px solid transparent;cursor:pointer}
+.swatch[aria-pressed="true"]{border-color:#fff}
+.rpeople{flex:none;padding:6px 10px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:12px;color:#7ee0a8;white-space:nowrap}
+
+/* ---------- 3D world ---------- */
+#world{position:fixed;inset:0;background:#100d0b;z-index:4;overflow:hidden}
+#w3{position:absolute;inset:0}
+.w-top{position:absolute;left:0;right:0;top:0;display:flex;align-items:flex-start;gap:8px;pointer-events:none;
+  padding-top:calc(10px + env(safe-area-inset-top,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.w-top>*{pointer-events:auto}
+.w-floor{display:flex;flex-direction:column;padding:8px 12px;border-radius:12px;background:rgba(16,13,11,.72);backdrop-filter:blur(6px);margin-right:auto;min-width:0}
+.w-floor b{font-family:var(--display);font-weight:400;font-size:22px;line-height:1;color:var(--gold)}
+.w-floor span{font-size:12px;color:var(--fg)}
+.w-floor small{font-size:10px;color:var(--muted);letter-spacing:.14em}
+.w-elev{display:flex;flex-direction:column;gap:6px;padding:6px;border-radius:12px;background:rgba(16,13,11,.72);backdrop-filter:blur(6px)}
+.w-elev button{width:40px;height:34px;border-radius:8px;border:1px solid var(--line);background:#2b2f35;color:#d9dde3;font-family:var(--display);font-size:15px;cursor:pointer}
+.w-elev button[aria-pressed="true"]{background:#ffb347;color:#1a1208;border-color:transparent}
+.w-side{display:flex;flex-direction:column;gap:6px}
+.w-side .icon-btn{background:rgba(16,13,11,.72);backdrop-filter:blur(6px)}
+.w-enter{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));padding:14px 22px;border-radius:999px;border:0;
+  background:var(--gold);color:#1a1208;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.45);white-space:nowrap;max-width:calc(100% - 32px);overflow:hidden;text-overflow:ellipsis}
+.w-stick{position:absolute;left:max(20px,env(safe-area-inset-left,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));width:120px;height:120px;border-radius:50%;
+  background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.22);touch-action:none;backdrop-filter:blur(4px);cursor:pointer}
+.w-stick i{position:absolute;left:50%;top:50%;width:50px;height:50px;border-radius:50%;background:rgba(241,231,214,.85);transform:translate(-50%,-50%);box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.w-help{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(140px + env(safe-area-inset-bottom,0px));max-width:min(56%,300px);padding:10px 12px;border-radius:12px;
+  background:rgba(16,13,11,.72);font-size:12px;line-height:1.5;color:var(--fg);transition:opacity .6s;pointer-events:none}
+.w-help.gone{opacity:0}
+.w-fade{position:absolute;inset:0;background:#000;opacity:1;pointer-events:none;transition:opacity .32s}
+.to3d{align-self:flex-start;padding:10px 16px;border-radius:999px;border:0;background:var(--gold);color:#1a1208;font-weight:700;font-size:14px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.w-fade,.w-help{transition:none}}
+
+@media (max-width:520px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (prefers-reduced-motion:reduce){.door,.hint{transition:none}.door:hover{transform:none}}
+</style>
+</head>
+<body>
+
+<main id="hub">
+  <header class="sign">
+    <span class="tag">MIND GYM · 마음 체육관</span>
+    <h1>스트레스 <span>해소방</span></h1>
+    <p>오늘 쌓인 건 여기 두고 가요. 문을 열고 들어가서 마음껏 터뜨리고, 숨 고르고, 친구들과 나눠요.</p>
+    <button class="to3d" id="to3d" hidden>🏢 3D 복도로 들어가기</button>
+  </header>
+
+  <section class="course" aria-label="추천 코스">
+    <h2>추천 코스 · 10분이면 충분해요</h2>
+    <nav class="steps">
+      <a class="step" href="#weather"><i>STEP 1</i><b>마음 날씨</b><small>지금 기분 고르기</small></a>
+      <a class="step" href="#sandbag"><i>STEP 2</i><b>샌드백</b><small>시원하게 풀기</small></a>
+      <a class="step" href="#breath"><i>STEP 3</i><b>숨 풍선</b><small>천천히 가라앉히기</small></a>
+      <a class="step" href="#wall"><i>STEP 4</i><b>응원 벽</b><small>한 줄 남기기</small></a>
+    </nav>
+  </section>
+
+  <div id="floors"></div>
+
+  <p class="foot">소리와 진동이 나와요. 진동은 안드로이드 폰에서 작동하고, 아이폰은 화면 흔들림으로 대신해요. 때리고 깨는 대상은 사람 대신 상황이나 감정으로 정해 주세요.</p>
+</main>
+
+<section id="world" hidden aria-label="3D 복도">
+  <div id="w3"></div>
+  <div class="w-top">
+    <div class="w-floor"><small>STRESS RELIEF</small><b id="wFloorNo">밖</b><span id="wFloorName">스트레스 해소방 앞</span></div>
+    <div class="w-elev" role="group" aria-label="엘리베이터"><button data-fl="3" aria-pressed="false">3F</button><button data-fl="2" aria-pressed="false">2F</button><button data-fl="1" aria-pressed="true">1F</button><button data-fl="0" aria-pressed="false" aria-label="건물 밖으로">밖</button></div>
+    <div class="w-side"><button class="icon-btn" id="wMute" aria-label="소리 끄기">🔊</button><button class="icon-btn" id="wList" aria-label="목록으로 보기" title="목록으로 보기">☰</button></div>
+  </div>
+  <button class="w-enter" id="wEnter" hidden>🚪 <span></span> 들어가기</button>
+  <div class="w-stick" id="wStick" aria-label="이동 조이스틱"><i></i></div>
+  <button class="w-people" id="wPeople" aria-expanded="false">👥 <b id="wCount">1</b>명</button>
+  <div class="w-plist" id="wPlist" hidden></div>
+  <div class="w-emotes" id="wEmotes" hidden>
+    <button data-em="👋" aria-label="손 흔들기">👋</button><button data-em="💪" aria-label="힘내">💪</button><button data-em="❤️" aria-label="하트">❤️</button><button data-em="👏" aria-label="박수">👏</button><button data-em="😂" aria-label="웃음">😂</button>
+    <button id="wSayBtn" aria-label="말하기" aria-expanded="false">💬</button>
+  </div>
+  <div class="w-say" id="wSay" hidden></div>
+  <div class="w-join" id="wJoin" hidden role="dialog" aria-label="입장 준비">
+    <div class="w-card">
+      <h2>스트레스 해소방 입장</h2>
+      <p>친구들에게 보일 별명과 모습을 골라요. 진짜 이름은 안 써도 돼요.</p>
+      <div id="wCodeRow" hidden style="display:flex;flex-direction:column;gap:6px">
+        <label for="wCode" style="font-size:13px;font-weight:700">반 코드</label>
+        <div class="row"><input class="field" id="wCode" maxlength="20" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="선생님이 알려 준 코드"><button class="btn ghost" id="wNewCode" type="button">새로 만들기</button></div>
+        <p class="note" style="margin:0">선생님이 보내 준 링크로 들어왔다면 이미 채워져 있어요. 같은 코드끼리만 서로 보여요.</p>
+      </div>
+      <div class="row" id="wSty"></div>
+      <input class="field" id="wNick" maxlength="8" placeholder="별명 (최대 8자)">
+      <div class="row" id="wAva"></div>
+      <div class="row" id="wCol"></div>
+      <button class="btn" id="wGo" style="width:100%">입장하기</button>
+      <p class="note" id="wJoinNote"></p>
+    </div>
+  </div>
+  <div class="w-help" id="wHelp">왼쪽 조이스틱으로 걷고, 화면을 끌어서 둘러봐요. 바닥을 클릭(탭)하면 그곳으로 걸어가고, 문을 클릭하면 열어요. 마우스 휠로 확대·축소해요.</div>
+  <div class="w-fade" id="wFade"></div>
+</section>
+
+<section id="room" hidden aria-live="polite">
+  <div class="rbar">
+    <button class="back" id="back">← 복도로</button>
+    <div class="rtitle"><b id="rTitle"></b><small id="rSub"></small></div>
+    <span class="rpeople" id="rPeople" hidden></span>
+    <button class="icon-btn" id="mute" aria-label="소리 끄기">🔊</button>
+  </div>
+  <div class="rbody" id="rbody"></div>
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="js/fb-config.js"></script>
+<script src="js/fb-shim.js"></script>
+<script src="js/core.js"></script>
+<script src="rooms/sandbag.js"></script>
+<script src="rooms/plates.js"></script>
+<script src="rooms/shredder.js"></script>
+<script src="rooms/mole.js"></script>
+<script src="rooms/bubble.js"></script>
+<script src="rooms/breath.js"></script>
+<script src="rooms/sand.js"></script>
+<script src="rooms/kinetic.js"></script>
+<script src="rooms/weather.js"></script>
+<script src="rooms/wall.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="world.js"></script>
+<script src="multi.js"></script>
+<script src="js/init.js"></script>
+</body>
+</html>
