@@ -31,7 +31,7 @@ const shade=(hex,k)=>{const c=new T.Color(hex);c.multiplyScalar(k);return'#'+c.g
 const FL=[
   {no:1,name:'터뜨리는 방',desc:'세게 치고, 깨고, 갈아 버려요',c:'#c4402f',wall:'#efe3d3',tile:['#d9cbb6','#c7b497']},
   {no:2,name:'쉬어가는 방',desc:'천천히, 손끝으로 가라앉혀요',c:'#3f9d8c',wall:'#e2ece6',tile:['#cbd8d0','#b2c5ba']},
-  {no:3,name:'함께하는 방',desc:'우리 반 친구들과 나눠요',c:'#d79a2b',wall:'#f2e8d3',tile:['#ddd0b3','#c9b892']}];
+  {no:3,name:'함께하는 방',desc:'나누고, 쉬고, 숨 고르기',c:'#d79a2b',wall:'#f2e8d3',tile:['#ddd0b3','#c9b892']}];
 const POSTERS=[
   {title:'추천 코스',lines:['① 마음 날씨  3F','② 샌드백  1F','③ 숨 풍선  2F','④ 응원 벽  3F'],foot:'10분이면 충분해요'},
   {title:'숨 고르기',lines:['4초 들이쉬고','2초 멈추고','6초 내쉬기','다섯 번만 해 봐요'],foot:'202호 숨 풍선'},

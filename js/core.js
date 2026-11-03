@@ -119,7 +119,7 @@ H.buildHub=()=>{
   const floors=[
     {no:'1F',name:'터뜨리는 방',desc:'세게 치고, 깨고, 갈아 버려요',c:'var(--f1)'},
     {no:'2F',name:'쉬어가는 방',desc:'천천히, 손끝으로 가라앉혀요',c:'var(--f2)'},
-    {no:'3F',name:'함께하는 방',desc:'우리 반 친구들과 나눠요',c:'var(--f3)'}];
+    {no:'3F',name:'함께하는 방',desc:'나누고, 쉬고, 숨 고르기',c:'var(--f3)'}];
   const host=document.getElementById('floors');host.innerHTML='';
   floors.forEach((f,fi)=>{const sec=document.createElement('section');sec.className='floor';sec.style.setProperty('--c',f.c);
     sec.innerHTML=`<div class="floor-head"><span class="no">${f.no}</span><h3>${f.name}</h3><span>${f.desc}</span></div><div class="doors"></div>`;
