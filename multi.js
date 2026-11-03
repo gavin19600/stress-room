@@ -164,12 +164,12 @@ H.onRoute=()=>{pushPresence(true);refreshCounts()};
 
 /* ---------- per-frame ---------- */
 W.tick=(dt,running)=>{const now=performance.now();if(now-lastT>90){lastT=now;pushPresence(false)}
-  if(selfAv){selfAv.g.visible=running;selfAv.g.position.set(P.x,0,P.z);selfAv.g.rotation.y=P.face;selfAv.body.userData.pose(dt,P.speed||0);
+  if(selfAv){selfAv.g.visible=running;selfAv.g.position.set(P.x,P.gy||0,P.z);selfAv.g.rotation.y=P.face;selfAv.body.userData.pose(dt,P.speed||0);
     if(selfBubbleT>0){selfBubbleT-=dt;selfAv.bubble.material.opacity=Math.min(1,selfBubbleT*2);if(selfBubbleT<=0)selfAv.bubble.visible=false}}
   others.forEach(o=>{const vis=running&&!o.rm&&o.fl===P.floor;o.av.g.visible=vis;if(!vis){o.x=o.tx;o.z=o.tz;o.yaw=o.tyaw;return}
     const k=Math.min(1,dt*8),px=o.x,pz=o.z;o.x+=(o.tx-o.x)*k;o.z+=(o.tz-o.z)*k;let dy=((o.tyaw-o.yaw+Math.PI*3)%(Math.PI*2))-Math.PI;o.yaw+=dy*k;
     const sp=Math.hypot(o.x-px,o.z-pz)/Math.max(dt,.001);if(sp>.3)o.bob+=dt*10;else o.bob*=.9;
-    o.av.g.position.set(o.x,0,o.z);o.av.g.rotation.y=o.yaw;o.av.body.userData.pose(dt,Math.min(3,sp));o.av.label.material.opacity=o.idle?.5:1;
+    o.av.g.position.set(o.x,P.floor===OUT?W.groundY(o.x,o.z):0,o.z);o.av.g.rotation.y=o.yaw;o.av.body.userData.pose(dt,Math.min(3,sp));o.av.label.material.opacity=o.idle?.5:1;
     if(o.bubbleT>0){o.bubbleT-=dt;o.av.bubble.material.opacity=Math.min(1,o.bubbleT*2);if(o.bubbleT<=0)o.av.bubble.visible=false}})};
 
 /* ---------- connect ---------- */
