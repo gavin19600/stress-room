@@ -20,11 +20,24 @@ root.innerHTML=`
 .sb-file{position:absolute;opacity:0;width:1px;height:1px}
 .sb-pick{flex:1;display:flex;align-items:center;justify-content:center;padding:11px;border-radius:8px;border:1px dashed var(--muted);font-weight:700;cursor:pointer;font-size:14px}
 .emoji{font-size:22px;padding:4px 9px}
+.sb-hud{position:absolute;top:10px;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:baseline;padding:6px 16px;border-radius:999px;background:rgba(0,0,0,.65);white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:none;z-index:2}
+.sb-hud b{font-family:var(--display);font-weight:400;font-size:26px;color:#ff6b5b}
+.sb-hud span{font-size:15px;font-weight:700}.sb-hud em{font-style:normal;font-size:13px;color:#9fd3ff}
+.sb-modes{display:flex;gap:6px;flex-wrap:wrap}.sb-modes .chip{flex:1;min-width:0;font-size:13px;padding:8px 6px}
+[data-r="gov"]{z-index:3}
 </style>
 <div class="stage" data-r="stage">
-  <div class="sb-stats"><div><b data-r="hits">0</b><span>타격</span></div><div><b data-r="combo">0</b><span>콤보</span></div><div><b data-r="best">0</b><span>최고</span></div></div>
+  <div class="sb-hud" data-r="hud" hidden><b data-r="gtime">30</b><span data-r="gscore">0점</span><em data-r="gopp"></em></div>
+  <div class="overlay" data-r="gov" hidden></div>
+  <div class="sb-stats" data-r="stats"><div><b data-r="hits">0</b><span>타격</span></div><div><b data-r="combo">0</b><span>콤보</span></div><div><b data-r="best">0</b><span>최고</span></div></div>
   <button class="corner" data-r="heal">🩹 회복</button>
   <div class="hint" data-r="hint">샌드백을 두드리세요 · PC는 F / J 키</div>
+</div>
+<div class="sb-modes">
+  <button class="chip" data-mode="free" aria-pressed="true">자유 연습</button>
+  <button class="chip" data-mode="solo" aria-pressed="false">⏱ 30초 도전</button>
+  <button class="chip" data-mode="duel" aria-pressed="false">🥊 1:1 대결</button>
+  <button class="chip" data-mode="rank" aria-pressed="false">🏆 순위</button>
 </div>
 <div class="tabs" role="tablist">
   <button class="tab" role="tab" aria-selected="true" data-p="text">글자</button>
@@ -166,7 +179,7 @@ function punch(x,y,side){const g=geom(),now=performance.now();
   pops.push({x:w.x,y:w.y,t:0,txt:big?combo+' 콤보!':zone==='nose'?'코피!':zone==='eye'?'눈탱이!':WORDS[Math.random()*WORDS.length|0],big:big||zone==='nose'});
   gloves[side]=1;gloves[side+'x']=w.x;gloves[side+'y']=w.y;
   punchSound(power,zone);H.buzz(zone==='nose'?[60,30,60]:big?[40,30,90]:Math.round(30+Math.min(combo,10)*4));if(big)bell();
-  q('hits').textContent=hits;q('combo').textContent=combo;q('best').textContent=best;q('hint').style.opacity=0}
+  q('hits').textContent=hits;q('combo').textContent=combo;q('best').textContent=best;q('hint').style.opacity=0;scorePunch()}
 let alt=false;
 cv.addEventListener('pointerdown',e=>{e.preventDefault();H.ac();const p=S.pos(e);
   if(noseMode){const g=geom(),l=toLocal(p.x,p.y),u=(l.x-g.fx)/g.fw,v=(l.y-g.fy)/g.fh;
@@ -222,6 +235,99 @@ function drawGlove(side,amt,tx,ty){const bx0=side==='L'?W*.15:W*.85,by0=Ht+24,e=
   ctx.beginPath();ctx.ellipse(0,0,s*.85,s*.95,0,0,7);ctx.fill();ctx.beginPath();ctx.ellipse(s*.65,s*.15,s*.35,s*.45,.4,0,7);ctx.fill();
   ctx.fillStyle='rgba(255,255,255,.28)';ctx.beginPath();ctx.ellipse(-s*.3,-s*.45,s*.25,s*.14,-.5,0,7);ctx.fill();ctx.restore()}
 
+/* ---------- 30초 도전 · 1:1 대결 · 순위 ---------- */
+const FB=window.SR_FB||null,GAME_LEN=30,MAXS=400;
+const G={mode:'free',phase:'idle',score:0,lastAt:0,endAt:0,opp:null,offs:[],iv:0,localBest:H.store.get('sbBest',0)};
+const nickOf=()=>{const m=H.store.get('me',{})||{};return String(m.nick||'익명').slice(0,8)};
+const todayK=()=>new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
+const hud=q('hud'),gov=q('gov');
+function ov(html){gov.innerHTML=html;gov.hidden=false}
+function closeOv(){gov.hidden=true}
+function setMode(m){root.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===m))}
+function cleanup(){G.offs.splice(0).forEach(f=>{try{f()}catch(e){}});clearInterval(G.iv);G.iv=0}
+function scorePunch(){if(G.phase!=='play')return;const n=performance.now();if(n-G.lastAt<60)return;G.lastAt=n;
+  G.score=Math.min(MAXS,G.score+1+(combo>0&&combo%10===0?5:0));q('gscore').textContent=G.score+'점'}
+function beep(f,d){const t=H.now();H.tone(f,t,d||.15,.18,'square')}
+function countdown(sec,then){G.phase='count';let n=sec;const tick=()=>{if(G.phase!=='count')return;
+    if(n>0){ov(`<h2 style="font-size:72px;line-height:1">${n}</h2><p>준비!</p>`);beep(660);H.buzz(30);n--;setTimeout(tick,1000)}
+    else{ov(`<h2 style="font-size:52px">시작!</h2>`);beep(990,.3);H.buzz([60,30,60]);setTimeout(()=>{if(G.phase==='count'||G.phase==='play')closeOv()},500);then()}};tick()}
+function startPlay(endAtLocal){G.phase='play';G.score=0;G.lastAt=0;G.endAt=endAtLocal||performance.now()+GAME_LEN*1000;
+  q('stats').hidden=true;hud.hidden=false;q('gscore').textContent='0점';q('gopp').textContent=G.opp?`${G.opp.nick} ${G.opp.score|0}점`:'';q('gopp').hidden=!G.opp;
+  clearInterval(G.iv);G.iv=setInterval(()=>{const left=Math.max(0,(G.endAt-performance.now())/1000);q('gtime').textContent=left.toFixed(left<10?1:0);
+    if(G.opp)q('gopp').textContent=`${G.opp.nick} ${G.opp.score|0}점`;
+    if(G.onTick)G.onTick();
+    if(left<=3&&left>0&&Math.ceil(left)!==G.lastBeep){G.lastBeep=Math.ceil(left);beep(880,.08)}
+    if(left<=0){clearInterval(G.iv);G.iv=0;finish()}},100)}
+function finish(){if(G.phase!=='play')return;G.phase='end';G.lastBeep=0;hud.hidden=true;q('stats').hidden=false;
+  const t=H.now();[523,659,784,1046].forEach((f,i)=>H.tone(f,t+i*.1,.25,.15,'triangle'));H.buzz([80,40,80]);
+  if(G.onFinish)G.onFinish();else showResult()}
+function showResult(extra){const s=G.score;const nb=s>G.localBest;if(nb){G.localBest=s;H.store.set('sbBest',s)}
+  ov(`<h2>${extra?extra.title:s+'점!'}</h2><p>${extra?extra.sub:(nb?'내 최고 기록이에요! 🎉':'내 최고 기록 '+G.localBest+'점')}</p>
+    <p data-r="rankmsg" style="color:var(--gold)">${FB?'순위에 기록하는 중…':''}</p>
+    <div class="row" style="justify-content:center"><button class="btn" data-act="again">다시 하기</button><button class="btn ghost" data-act="rank">🏆 순위</button><button class="btn ghost" data-act="close">닫기</button></div>`);
+  saveScore(s).then(r=>{const el=gov.querySelector('[data-r="rankmsg"]');if(el&&r)el.textContent=r})}
+async function saveScore(s){if(!FB||s<=0)return'';try{await FB.ready();const db=FB.db,uid=FB.uid(),b=FB.base(),nick=nickOf(),v=Math.min(MAXS,s|0);
+    const put=async path=>{const ref=db.ref(path),cur=(await ref.once('value')).val();if(cur&&cur.score>=v)return false;if(cur&&FB.now()-cur.at<26000)return false;await ref.set({nick,score:v,at:FB.TS});return true};
+    const a=await put(`${b}/lbd/${todayK()}/${uid}`),c=await put(`${b}/lb/${uid}`);
+    const snap=await db.ref(`${b}/lbd/${todayK()}`).orderByChild('score').limitToLast(200).once('value');const arr=[];snap.forEach(x=>{arr.push({id:x.key,...x.val()})});arr.sort((x,y)=>y.score-x.score);
+    const i=arr.findIndex(x=>x.id===uid);return (c?'전체 최고 기록 갱신! ':'')+(i>=0?`오늘 ${i+1}위 (${arr[i].score}점)`:'')}catch(e){console.warn(e);return'순위 기록을 하지 못했어요.'}}
+async function showRank(which){which=which||'today';setMode('rank');
+  const tabs=`<div class="tabs" style="width:min(320px,100%)"><button class="tab" data-act="rk-today" aria-selected="${which==='today'}">오늘</button><button class="tab" data-act="rk-all" aria-selected="${which==='all'}">전체</button></div>`;
+  ov(`<h2>🏆 샌드백 30초 순위</h2>${tabs}<div data-r="rklist" style="width:min(320px,100%)"><p>불러오는 중…</p></div><button class="btn ghost" data-act="close">닫기</button>`);
+  const box=gov.querySelector('[data-r="rklist"]');
+  if(!FB){box.innerHTML=`<p>함께 하기 서버에 연결되지 않아 순위를 볼 수 없어요.<br>내 최고 기록: ${G.localBest}점</p>`;return}
+  try{await FB.ready();const path=which==='today'?`${FB.base()}/lbd/${todayK()}`:`${FB.base()}/lb`;
+    const snap=await FB.db.ref(path).orderByChild('score').limitToLast(200).once('value');const arr=[];snap.forEach(x=>{arr.push({id:x.key,...x.val()})});arr.sort((a,b)=>b.score-a.score);
+    const me=FB.uid(),mi=arr.findIndex(x=>x.id===me),M=['🥇','🥈','🥉','4','5'];
+    box.innerHTML=(arr.length?arr.slice(0,5).map((r,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;margin:4px 0;border-radius:10px;background:${r.id===me?'rgba(232,178,58,.25)':'rgba(255,255,255,.07)'}">
+      <b style="width:28px;font-size:${i<3?22:16}px;text-align:center">${M[i]}</b><span style="flex:1;text-align:left">${H.esc(r.nick||'익명')}${r.id===me?' (나)':''}</span><b style="font-variant-numeric:tabular-nums">${r.score}점</b></div>`).join(''):'<p>아직 기록이 없어요. 첫 1위가 되어 보세요!</p>')+
+      (mi>=5?`<p style="margin-top:8px">내 순위: ${mi+1}위 (${arr[mi].score}점)</p>`:'')}
+  catch(e){box.innerHTML='<p>순위를 불러오지 못했어요.</p>'}}
+function startSolo(){cleanup();G.mode='solo';G.opp=null;G.onFinish=null;G.onTick=null;setMode('solo');countdown(3,()=>startPlay())}
+function startBot(){cleanup();G.mode='bot';setMode('duel');G.opp={nick:'연습 로봇🤖',score:0};let rate=4+Math.random()*2.5;
+  G.onTick=()=>{if(G.phase==='play'){G.opp.score+=rate*.1*(0.6+Math.random()*.8);if(Math.random()<.02)rate=4+Math.random()*3}};
+  G.onFinish=()=>duelResult(G.score,Math.round(G.opp.score));
+  ov(`<h2>🤖 연습 로봇과 대결</h2><p>30초 동안 더 많이 때리면 이겨요!</p>`);setTimeout(()=>countdown(3,()=>startPlay()),1200)}
+function duelResult(me,op,left){const win=me>op,draw=me===op;
+  showResult({title:left?'상대가 나갔어요 — 승리!':draw?'무승부!':win?'승리! 🎉':'아쉽게 졌어요',sub:`나 ${me}점 : ${H.esc(G.opp.nick)} ${op}점`});
+  if(win||left){const t=H.now();[784,988,1175,1568].forEach((f,i)=>H.tone(f,t+.5+i*.12,.3,.15,'triangle',{wet:true}))}}
+async function startDuel(){cleanup();setMode('duel');
+  if(!FB){ov(`<h2>1:1 대결</h2><p>함께 하기 서버에 연결되지 않았어요.</p><div class="row" style="justify-content:center"><button class="btn" data-act="bot">🤖 연습 로봇과 하기</button><button class="btn ghost" data-act="close">닫기</button></div>`);return}
+  G.mode='duel';G.phase='search';G.opp=null;G.onTick=null;G.onFinish=null;
+  ov(`<h2>🥊 상대를 찾는 중…</h2><p>지금 대결 버튼을 누른 친구와 바로 연결돼요.</p><p data-r="qn"></p><div class="row" style="justify-content:center"><button class="btn" data-act="bot">🤖 연습 로봇과 하기</button><button class="btn ghost" data-act="cancel">취소</button></div>`);
+  try{await FB.ready()}catch(e){return}if(G.phase!=='search')return;
+  const db=FB.db,uid=FB.uid(),b=FB.base(),myQ=db.ref(`${b}/mq/${uid}`);
+  await myQ.set({nick:nickOf(),t:FB.TS}).catch(()=>{});myQ.onDisconnect().remove();G.offs.push(()=>{myQ.onDisconnect().cancel();myQ.remove().catch(()=>{})});
+  const qref=db.ref(`${b}/mq`);const onQ=s=>{if(G.phase!=='search')return;const now=FB.now(),arr=[];s.forEach(c=>{const v=c.val();if(v&&v.t&&now-v.t<120000)arr.push({id:c.key,nick:v.nick,t:v.t})});
+    arr.sort((x,y)=>x.t-y.t||(x.id<y.id?-1:1));const qn=gov.querySelector('[data-r="qn"]');if(qn)qn.textContent=`기다리는 사람 ${arr.length}명`;
+    const i=arr.findIndex(x=>x.id===uid);if(i<0)return;const p=arr[i%2===0?i+1:i-1];if(!p)return;
+    qref.off('value',onQ);myQ.remove().catch(()=>{});enterMatch(p)};
+  qref.on('value',onQ);G.offs.push(()=>qref.off('value',onQ))}
+async function enterMatch(p){const db=FB.db,uid=FB.uid(),b=FB.base(),mid=[uid,p.id].sort().join('_'),me=db.ref(`${b}/mt/${mid}/${uid}`),room=db.ref(`${b}/mt/${mid}`);
+  G.phase='matched';G.opp={nick:p.nick||'상대',score:0,id:p.id};
+  ov(`<h2>🥊 ${H.esc(G.opp.nick)} 님과 대결!</h2><p>곧 시작해요. 30초 동안 더 많이 때리면 이겨요!</p>`);beep(784,.2);H.buzz([40,30,40]);
+  await me.set({nick:nickOf(),score:0,t:FB.TS}).catch(()=>{});me.onDisconnect().remove();
+  let started=false,oppSeen=false,oppDone=false,oppFinal=0,lastPush=0;
+  const giveUp=setTimeout(()=>{if(!oppSeen&&G.phase==='matched'){ov(`<h2>상대가 연결되지 않았어요</h2><div class="row" style="justify-content:center"><button class="btn" data-act="duel">다시 찾기</button><button class="btn" data-act="bot">🤖 연습 로봇과 하기</button></div>`);G.phase='idle';cleanup()}},10000);
+  const onRoom=s=>{const v=s.val()||{},mine=v[uid],op=v[p.id];
+    if(op){oppSeen=true;G.opp.nick=String(op.nick||G.opp.nick).slice(0,8);G.opp.score=op.score|0;if(op.done){oppDone=true;oppFinal=op.score|0}}
+    if(!started&&mine&&op&&mine.t&&op.t){started=true;clearTimeout(giveUp);const startSrv=Math.max(mine.t,op.t)+4500,local=performance.now()+(startSrv-FB.now());
+      const wait=Math.max(0,local-performance.now()-3000);setTimeout(()=>countdown(3,()=>startPlay(local+GAME_LEN*1000)),wait)}
+    if(started&&!op&&(G.phase==='play'||G.phase==='count')){G.phase='end';hud.hidden=true;q('stats').hidden=false;clearInterval(G.iv);duelResult(G.score,G.opp.score,true)}};
+  room.on('value',onRoom);
+  G.onTick=()=>{const n=performance.now();if(n-lastPush>400){lastPush=n;me.update({score:G.score,t:FB.TS}).catch(()=>{})}};
+  G.onFinish=()=>{me.update({score:G.score,done:true,t:FB.TS}).catch(()=>{});ov('<h2>결과를 기다리는 중…</h2>');
+    const wait0=performance.now();const w=setInterval(()=>{if(oppDone||performance.now()-wait0>5000){clearInterval(w);duelResult(G.score,oppDone?oppFinal:G.opp.score)}},200);G.offs.push(()=>clearInterval(w))};
+  G.offs.push(()=>{room.off('value',onRoom);clearTimeout(giveUp);me.onDisconnect().cancel();setTimeout(()=>me.remove().catch(()=>{}),3000)})}
+gov.addEventListener('click',e=>{const a=e.target.closest('[data-act]');if(!a)return;const act=a.dataset.act;
+  if(act==='close'){closeOv();if(G.phase!=='play'){G.phase='idle';setMode('free')}}
+  else if(act==='again'){G.mode==='duel'?startDuel():G.mode==='bot'?startBot():startSolo()}
+  else if(act==='rank')showRank('today');else if(act==='rk-today')showRank('today');else if(act==='rk-all')showRank('all');
+  else if(act==='bot')startBot();else if(act==='duel')startDuel();
+  else if(act==='cancel'){cleanup();G.phase='idle';closeOv();setMode('free')}});
+root.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{const m=b.dataset.mode;if(G.phase==='play'||G.phase==='count')return;
+  if(m==='free'){cleanup();G.phase='idle';closeOv();setMode('free')}else if(m==='solo')startSolo();else if(m==='duel')startDuel();else if(m==='rank')showRank('today')});
+
 const stop=H.loop(dt=>{
   if(freeze>0)freeze--;else{
     for(let i=0;i<dt;i++){omega+=-.0028*Math.sin(theta);omega*=.972;theta+=omega}
@@ -243,5 +349,5 @@ const stop=H.loop(dt=>{
   ctx.restore();
   ['L','R'].forEach(s=>{if(gloves[s]>0)gloves[s]=Math.max(0,gloves[s]-.1*dt);drawGlove(s,gloves[s]>0?1-gloves[s]:0,gloves[s+'x']||W/2,gloves[s+'y']||Ht/2)});
 });
-return()=>{stop();S.stop();AC.abort()};
+return()=>{stop();S.stop();AC.abort();cleanup();G.phase='idle'};
 }});

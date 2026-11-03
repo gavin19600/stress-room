@@ -72,7 +72,7 @@ const clean=v=>{const o={};const s=(x,n)=>typeof x==='string'?x.slice(0,n):undef
   if(v.nick)o.nick=s(v.nick,8);if(v.ava)o.ava=s(v.ava,8);if(typeof v.col==='string'&&/^#[0-9a-f]{6}$/.test(v.col))o.col=v.col;if(v.sty==='kid'||v.sty==='teen')o.sty=v.sty;
   if(Number.isInteger(v.fl)&&v.fl>=-1&&v.fl<=3)o.fl=v.fl;if(typeof v.rm==='string'&&v.rm.length<=12)o.rm=v.rm;
   ['x','z','yaw'].forEach(k=>{if(typeof v[k]==='number'&&isFinite(v[k]))o[k]=Math.round(v[k]*100)/100});
-  o.x=Math.max(-30,Math.min(30,o.x||0));o.z=Math.max(-40,Math.min(40,o.z||0));if(!o.nick)o.nick='친구';return o};
+  o.x=Math.max(-45,Math.min(45,o.x||0));o.z=Math.max(-45,Math.min(45,o.z||0));if(!o.nick)o.nick='친구';return o};
 function flush(){pending=false;lastSend=Date.now();if(!connected||!uid||!code)return;myRef().set({...clean(mine),t:TS}).catch(e=>console.warn('presence',e))}
 function schedule(){if(pending)return;pending=true;const wait=Math.max(0,300-(Date.now()-lastSend));clearTimeout(sendT);sendT=setTimeout(flush,wait)}
 function toPeer(id,v){return Object.freeze({peer:id,by:id,isMe:id===uid,sameTab:id===uid,kind:'viewer',guest:false,updatedAt:Date.now(),presence:Object.freeze({...v})})}
@@ -106,5 +106,6 @@ const roomApi=Object.freeze({
     const ref=db.ref(`${base()}/ev`).push();ref.onDisconnect().remove();
     try{await ref.set({k:topic,i,by:uid,t:TS})}catch(e){throw err(e)}setTimeout(()=>ref.remove().catch(()=>{}),15000)}});
 
+window.SR_FB=Object.freeze({db,TS,ready:ok,base,uid:()=>uid,now:()=>Date.now()+offset});
 window.claude=Object.freeze({use:async n=>n==='db'?dbApi:n==='user'?userApi:n==='room'?roomApi:null});
 })();

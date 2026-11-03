@@ -14,8 +14,17 @@ root.innerHTML=`
 <div class="row">
   <textarea class="field" id="sh-txt" rows="2" maxlength="80" placeholder="요즘 머릿속을 맴도는 걱정을 적어 보세요"></textarea>
   <button class="btn" data-r="go" style="align-self:stretch">갈아 버리기</button>
+</div>
+<div class="row">
+  <label class="btn ghost" for="sh-file" style="cursor:pointer">📷 사진 넣기</label><input type="file" id="sh-file" accept="image/*" hidden>
+  <span class="chip" data-r="ph" hidden>🖼️ 사진 1장 <button data-r="phx" aria-label="사진 빼기" style="border:0;background:none;color:inherit;cursor:pointer;font-size:14px">✕</button></span>
+  <span class="note" data-r="phn">잊고 싶은 장면이나 걱정을 사진으로 넣어도 돼요. 사진은 이 기기 밖으로 나가지 않아요.</span>
 </div>`;
 const q=k=>root.querySelector(`[data-r="${k}"]`),txt=root.querySelector('#sh-txt');
+let photo=null;
+root.querySelector('#sh-file').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const rd=new FileReader();
+  rd.onload=()=>{const im=new Image();im.onload=()=>{photo=im;q('ph').hidden=false;q('phn').hidden=true;hint('사진을 넣었어요. 하고 싶은 말을 적거나 바로 버튼을 누르세요');paper=null};im.src=rd.result};rd.readAsDataURL(f)};
+q('phx').onclick=e=>{e.preventDefault();photo=null;q('ph').hidden=true;q('phn').hidden=false;hint('걱정을 적고 버튼을 누르세요')};
 const S=H.canvas(q('stage')),ctx=S.ctx;
 const HAND='"Nanum Pen Script","Noto Sans KR",cursive';
 let mode='shred',count=H.store.get('shred',0);q('count').textContent=`없앤 걱정 ${count}개`;
@@ -30,7 +39,11 @@ function G(){const W=S.W,Hh=S.H,mw=Math.min(W*.78,340),mh=Math.max(54,Hh*.12),my
   return{W,Hh,mw,mh,mx:(W-mw)/2,my,pw,ph,px:(W-pw)/2,py:my-ph-6,binTop:my+mh,binBot:Hh-8}}
 
 let paper=null,pText='',state='idle',p=0,strips=[],pile=[],embers=[],flames=[];
-function makePaper(text){const g=G(),d=2,c=document.createElement('canvas');c.width=g.pw*d;c.height=g.ph*d;const x=c.getContext('2d');x.scale(d,d);
+function makePaper(text,img){const g=G(),d=2,c=document.createElement('canvas');c.width=g.pw*d;c.height=g.ph*d;const x=c.getContext('2d');x.scale(d,d);
+  if(img){x.fillStyle='#fdfdfb';x.fillRect(0,0,g.pw,g.ph);const m=10,cap=text?Math.min(56,g.ph*.2):m,iw=g.pw-m*2,ih=g.ph-m-cap;
+    const sc=Math.max(iw/img.width,ih/img.height),dw=img.width*sc,dh=img.height*sc;x.save();x.beginPath();x.rect(m,m,iw,ih);x.clip();x.drawImage(img,m+(iw-dw)/2,m+(ih-dh)/2,dw,dh);x.restore();
+    if(text){x.fillStyle='#22324a';let fs=Math.min(26,cap*.55);x.font=`${fs}px ${HAND}`;while(x.measureText(text).width>iw&&fs>11){fs-=1;x.font=`${fs}px ${HAND}`}x.textAlign='center';x.fillText(text,g.pw/2,g.ph-cap/2+fs*.35)}
+    return c}
   x.fillStyle='#fbf7ec';x.fillRect(0,0,g.pw,g.ph);
   x.strokeStyle='rgba(80,130,200,.35)';x.lineWidth=1;for(let y=34;y<g.ph;y+=24){x.beginPath();x.moveTo(0,y);x.lineTo(g.pw,y);x.stroke()}
   x.strokeStyle='rgba(220,80,80,.45)';x.beginPath();x.moveTo(22,0);x.lineTo(22,g.ph);x.stroke();
@@ -52,8 +65,8 @@ function grindSound(on){const a=H.ac();if(!a)return;
     [n.o,n.o2,n.lfo,n.n].forEach(x=>x.stop(t+.3));grindNodes=null}}
 let crackleT=0;
 
-q('go').onclick=()=>{if(state!=='idle')return;const t=txt.value.trim();if(!t){txt.focus();hint('먼저 걱정을 적어 주세요');return}
-  H.ac();pText=t;paper=makePaper(t);p=0;state='feed';txt.value='';hint('');
+q('go').onclick=()=>{if(state!=='idle')return;const t=txt.value.trim();if(!t&&!photo){txt.focus();hint('걱정을 적거나 사진을 넣어 주세요');return}
+  H.ac();pText=t;paper=makePaper(t,photo);photo=null;q('ph').hidden=true;q('phn').hidden=false;p=0;state='feed';txt.value='';hint('');
   if(mode==='shred'){grindSound(true);buzzLoop()}
   else{const tt=H.now();H.noise(tt,.4,'lowpass',500,.7,.5,{atk:.05,wet:true});H.buzz(40)}};
 let buzzT=null;function buzzLoop(){H.buzz([90,40,90,40,90,40,90,40,90,40,90,40,90,40,90]);}
