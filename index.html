@@ -130,6 +130,11 @@ textarea.field{resize:none;line-height:1.5}
 .swatch[aria-pressed="true"]{border-color:#fff}
 .rpeople{flex:none;padding:6px 10px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:12px;color:#7ee0a8;white-space:nowrap}
 
+/* ---------- channel badge ---------- */
+.chan{position:absolute;z-index:7;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));height:28px;width:auto;border-radius:7px;
+  background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.3);pointer-events:none;user-select:none}
+.chan-hub{position:static;display:block;height:30px;margin-top:4px;box-shadow:none}
+
 /* ---------- 3D world ---------- */
 #world{position:fixed;inset:0;background:#100d0b;z-index:4;overflow:hidden}
 #w3{position:absolute;inset:0}
@@ -147,7 +152,7 @@ textarea.field{resize:none;line-height:1.5}
 .w-side .icon-btn{background:rgba(16,13,11,.72);backdrop-filter:blur(6px)}
 .w-enter{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(150px + env(safe-area-inset-bottom,0px));padding:14px 22px;border-radius:999px;border:0;
   background:var(--gold);color:#1a1208;font-weight:700;font-size:16px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.45);white-space:nowrap;max-width:calc(100% - 32px);overflow:hidden;text-overflow:ellipsis}
-.w-stick{position:absolute;left:max(20px,env(safe-area-inset-left,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));width:120px;height:120px;border-radius:50%;
+.w-stick{position:absolute;left:max(20px,env(safe-area-inset-left,0px));bottom:calc(46px + env(safe-area-inset-bottom,0px));width:120px;height:120px;border-radius:50%;
   background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.22);touch-action:none;backdrop-filter:blur(4px);cursor:pointer}
 .w-stick i{position:absolute;left:50%;top:50%;width:50px;height:50px;border-radius:50%;background:rgba(241,231,214,.85);transform:translate(-50%,-50%);box-shadow:0 2px 8px rgba(0,0,0,.4)}
 .w-help{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(140px + env(safe-area-inset-bottom,0px));max-width:min(56%,300px);padding:10px 12px;border-radius:12px;
@@ -183,6 +188,7 @@ textarea.field{resize:none;line-height:1.5}
 
   <div id="floors"></div>
 
+  <img class="chan chan-hub" src="img/channel.png" alt="한문 김선생 유튜브 채널">
   <p class="foot">소리와 진동이 나와요. 진동은 안드로이드 폰에서 작동하고, 아이폰은 화면 흔들림으로 대신해요. 때리고 깨는 대상은 사람 대신 상황이나 감정으로 정해 주세요.</p>
 </main>
 
@@ -220,6 +226,7 @@ textarea.field{resize:none;line-height:1.5}
     </div>
   </div>
   <div class="w-help" id="wHelp">왼쪽 조이스틱으로 걷고, 화면을 끌어서 둘러봐요. 바닥을 클릭(탭)하면 그곳으로 걸어가고, 문을 클릭하면 열어요. 마우스 휠로 확대·축소해요.</div>
+  <img class="chan" src="img/channel.png" alt="한문 김선생 유튜브 채널">
   <div class="w-fade" id="wFade"></div>
 </section>
 
