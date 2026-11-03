@@ -22,7 +22,7 @@ root.innerHTML=`
 .emoji{font-size:22px;padding:4px 9px}
 .sb-hud{position:absolute;top:10px;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:baseline;padding:6px 16px;border-radius:999px;background:rgba(0,0,0,.65);white-space:nowrap;font-variant-numeric:tabular-nums;pointer-events:none;z-index:2}
 .sb-hud b{font-family:var(--display);font-weight:400;font-size:26px;color:#ff6b5b}
-.sb-hud span{font-size:15px;font-weight:700}.sb-hud em{font-style:normal;font-size:13px;color:#9fd3ff}
+.sb-hud span{font-size:15px;font-weight:700;display:inline-block;transition:transform .09s}.sb-hud em{font-style:normal;font-size:13px;color:#9fd3ff}
 .sb-modes{display:flex;gap:6px;flex-wrap:wrap}.sb-modes .chip{flex:1;min-width:0;font-size:13px;padding:8px 6px}
 [data-r="gov"]{z-index:3}
 </style>
@@ -236,7 +236,7 @@ function drawGlove(side,amt,tx,ty){const bx0=side==='L'?W*.15:W*.85,by0=Ht+24,e=
   ctx.fillStyle='rgba(255,255,255,.28)';ctx.beginPath();ctx.ellipse(-s*.3,-s*.45,s*.25,s*.14,-.5,0,7);ctx.fill();ctx.restore()}
 
 /* ---------- 30초 도전 · 1:1 대결 · 순위 ---------- */
-const FB=window.SR_FB||null,GAME_LEN=30,MAXS=400;
+const FB=window.SR_FB||null,GAME_LEN=30,MAXS=1000;
 const G={mode:'free',phase:'idle',score:0,lastAt:0,endAt:0,opp:null,offs:[],iv:0,localBest:H.store.get('sbBest',0)};
 const nickOf=()=>{const m=H.store.get('me',{})||{};return String(m.nick||'익명').slice(0,8)};
 const todayK=()=>new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
@@ -246,7 +246,8 @@ function closeOv(){gov.hidden=true}
 function setMode(m){root.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===m))}
 function cleanup(){G.offs.splice(0).forEach(f=>{try{f()}catch(e){}});clearInterval(G.iv);G.iv=0}
 function scorePunch(){if(G.phase!=='play')return;const n=performance.now();if(n-G.lastAt<60)return;G.lastAt=n;
-  G.score=Math.min(MAXS,G.score+1+(combo>0&&combo%10===0?5:0));q('gscore').textContent=G.score+'점'}
+  const add=2+Math.floor(Math.min(combo,20)/5)+(combo>0&&combo%10===0?10:0);G.score=Math.min(MAXS,G.score+add);q('gscore').textContent=G.score+'점';
+  const gp=q('gscore');gp.style.transform='scale(1.18)';clearTimeout(gp._t);gp._t=setTimeout(()=>gp.style.transform='',90)}
 function beep(f,d){const t=H.now();H.tone(f,t,d||.15,.18,'square')}
 function countdown(sec,then){G.phase='count';let n=sec;const tick=()=>{if(G.phase!=='count')return;
     if(n>0){ov(`<h2 style="font-size:72px;line-height:1">${n}</h2><p>준비!</p>`);beep(660);H.buzz(30);n--;setTimeout(tick,1000)}
@@ -262,7 +263,7 @@ function finish(){if(G.phase!=='play')return;G.phase='end';G.lastBeep=0;hud.hidd
   const t=H.now();[523,659,784,1046].forEach((f,i)=>H.tone(f,t+i*.1,.25,.15,'triangle'));H.buzz([80,40,80]);
   if(G.onFinish)G.onFinish();else showResult()}
 function showResult(extra){const s=G.score;const nb=s>G.localBest;if(nb){G.localBest=s;H.store.set('sbBest',s)}
-  ov(`<h2>${extra?extra.title:s+'점!'}</h2><p>${extra?extra.sub:(nb?'내 최고 기록이에요! 🎉':'내 최고 기록 '+G.localBest+'점')}</p>
+  ov(`<h2>${extra?extra.title:(s>=MAXS?'💯 1000점 만점!':s+'점! <small style="font-size:15px;opacity:.7">/ 1000</small>')}</h2><p>${extra?extra.sub:(nb?'내 최고 기록이에요! 🎉':'내 최고 기록 '+G.localBest+'점')}</p>
     <p data-r="rankmsg" style="color:var(--gold)">${FB?'순위에 기록하는 중…':''}</p>
     <div class="row" style="justify-content:center"><button class="btn" data-act="again">다시 하기</button><button class="btn ghost" data-act="rank">🏆 순위</button><button class="btn ghost" data-act="close">닫기</button></div>`);
   saveScore(s).then(r=>{const el=gov.querySelector('[data-r="rankmsg"]');if(el&&r)el.textContent=r})}
@@ -285,7 +286,7 @@ async function showRank(which){which=which||'today';setMode('rank');
   catch(e){box.innerHTML='<p>순위를 불러오지 못했어요.</p>'}}
 function startSolo(){cleanup();G.mode='solo';G.opp=null;G.onFinish=null;G.onTick=null;setMode('solo');countdown(3,()=>startPlay())}
 function startBot(){cleanup();G.mode='bot';setMode('duel');G.opp={nick:'연습 로봇🤖',score:0};let rate=4+Math.random()*2.5;
-  G.onTick=()=>{if(G.phase==='play'){G.opp.score+=rate*.1*(0.6+Math.random()*.8);if(Math.random()<.02)rate=4+Math.random()*3}};
+  G.onTick=()=>{if(G.phase==='play'){G.opp.score=Math.min(MAXS,G.opp.score+rate*.1*(0.6+Math.random()*.8)*3.6);if(Math.random()<.02)rate=4+Math.random()*3}};
   G.onFinish=()=>duelResult(G.score,Math.round(G.opp.score));
   ov(`<h2>🤖 연습 로봇과 대결</h2><p>30초 동안 더 많이 때리면 이겨요!</p>`);setTimeout(()=>countdown(3,()=>startPlay()),1200)}
 function duelResult(me,op,left){const win=me>op,draw=me===op;

@@ -87,8 +87,10 @@ function makeStudent(p){const g=new T.Group(),h=hashStr(p.nick||'x');
     head.scale.setScalar(1.32);head.position.y=1.74;g.scale.set(.86,.78,.86)}
   const headY=head.position.y;
   g.userData={legs,arms,head,phase:0};
-  g.userData.pose=(dt,speed)=>{const u=g.userData,amt=Math.min(1,speed/2.4);if(amt>.05)u.phase+=dt*speed*4.2;else u.phase*=.85;
-    const sw=Math.sin(u.phase)*.7*amt;legs[0].rotation.x=sw;legs[1].rotation.x=-sw;arms[0].rotation.x=-sw*.8;arms[1].rotation.x=sw*.8;
+  g.userData.pose=(dt,speed,air)=>{const u=g.userData,amt=Math.min(1.45,speed/2.4);if(amt>.05)u.phase+=dt*Math.min(speed,5.5)*(speed>3.5?3.3:4.2);else u.phase*=.85;
+    u.air=(u.air||0)+((air?1:0)-(u.air||0))*Math.min(1,dt*14);const a=u.air;
+    const sw=Math.sin(u.phase)*.7*Math.min(1.25,amt)*(1-a);legs[0].rotation.x=sw-.75*a;legs[1].rotation.x=-sw+.35*a;arms[0].rotation.x=-sw*.8-2.4*a;arms[1].rotation.x=sw*.8-2.4*a;
+    const lean=speed>3.5?.16:0;u.lean=(u.lean||0)+(lean-(u.lean||0))*Math.min(1,dt*6);g.rotation.x=u.lean;
     head.position.y=headY+Math.abs(Math.cos(u.phase))*.025*amt;g.children.forEach(()=>{});};
   return g}
 
@@ -108,7 +110,8 @@ function applyPresence(peer){const pr=peer.presence||{};let o=others.get(peer.pe
   const nick=String(pr.nick||'친구').slice(0,8),ava=AVAS.includes(pr.ava)?pr.ava:'🙂',col=COLS.includes(pr.col)?pr.col:'#8a8f98',sty=pr.sty==='kid'?'kid':'teen';
   if(!o){o={peer:peer.peer,av:makeAvatar({nick,ava,col,sty}),x:+pr.x||0,z:+pr.z||0,yaw:+pr.yaw||0,bob:0,bubbleT:0};others.set(peer.peer,o)}
   if(o.nick!==undefined&&(o.nick!==nick||o.ava!==ava||o.col!==col||o.sty!==sty)){disposeAvatar(o.av);o.av=makeAvatar({nick,ava,col,sty})}
-  Object.assign(o,{nick,ava,col,sty,fl:Number.isInteger(pr.fl)?pr.fl:-1,rm:typeof pr.rm==='string'&&H.rooms[pr.rm]?pr.rm:null,tx:+pr.x||0,tz:+pr.z||0,tyaw:+pr.yaw||0,guest:peer.guest,idle:Date.now()-peer.updatedAt>120000})}
+  Object.assign(o,{nick,ava,col,sty,fl:Number.isInteger(pr.fl)?pr.fl:-1,rm:typeof pr.rm==='string'&&H.rooms[pr.rm]?pr.rm:null,tx:+pr.x||0,tz:+pr.z||0,tyaw:+pr.yaw||0,guest:peer.guest,idle:Date.now()-peer.updatedAt>120000});peerJump(o,pr)}
+function peerJump(o,pr){const jp=Number.isInteger(pr.jp)?pr.jp:0;if(o.jp!==undefined&&jp!==o.jp)o.jt=.7;o.jp=jp}
 function removePeer(id){const o=others.get(id);if(!o)return;disposeAvatar(o.av);others.delete(id)}
 
 /* ---------- door badges: how many friends are in each room ---------- */
@@ -158,18 +161,19 @@ function heard(msg,isText){if(msg.sameTab)return;const o=others.get(msg.peer);if
 /* ---------- presence out ---------- */
 let lastSent={},lastT=0;
 function myState(){const inWorld=W.isRunning();return{nick:me?.nick||'친구',ava:me?.ava||'🙂',col:me?.col||'#8a8f98',sty:me?.sty==='kid'?'kid':'teen',
-  fl:H.listMode&&!H.lastRoom?-1:(inWorld||H.lastRoom?P.floor:-1),rm:H.lastRoom||null,x:Math.round(P.x*100)/100,z:Math.round(P.z*100)/100,yaw:Math.round(P.face*100)/100}}
+  fl:H.listMode&&!H.lastRoom?-1:(inWorld||H.lastRoom?P.floor:-1),rm:H.lastRoom||null,x:Math.round(P.x*100)/100,z:Math.round(P.z*100)/100,yaw:Math.round(P.face*100)/100,jp:P.jc|0}}
 function pushPresence(force){if(!room||!me)return;const s=myState();const ch=force||Object.keys(s).some(k=>s[k]!==lastSent[k]);if(!ch)return;lastSent=s;room.presence(s).catch(()=>{})}
 H.onRoute=()=>{pushPresence(true);refreshCounts()};
 
 /* ---------- per-frame ---------- */
 W.tick=(dt,running)=>{const now=performance.now();if(now-lastT>90){lastT=now;pushPresence(false)}
-  if(selfAv){selfAv.g.visible=running;selfAv.g.position.set(P.x,P.gy||0,P.z);selfAv.g.rotation.y=P.face;selfAv.body.userData.pose(dt,P.speed||0);
+  if(selfAv){selfAv.g.visible=running;selfAv.g.position.set(P.x,(P.gy||0)+(P.jy||0),P.z);selfAv.g.rotation.y=P.face;selfAv.body.userData.pose(dt,P.speed||0,P.air);
     if(selfBubbleT>0){selfBubbleT-=dt;selfAv.bubble.material.opacity=Math.min(1,selfBubbleT*2);if(selfBubbleT<=0)selfAv.bubble.visible=false}}
   others.forEach(o=>{const vis=running&&!o.rm&&o.fl===P.floor;o.av.g.visible=vis;if(!vis){o.x=o.tx;o.z=o.tz;o.yaw=o.tyaw;return}
     const k=Math.min(1,dt*8),px=o.x,pz=o.z;o.x+=(o.tx-o.x)*k;o.z+=(o.tz-o.z)*k;let dy=((o.tyaw-o.yaw+Math.PI*3)%(Math.PI*2))-Math.PI;o.yaw+=dy*k;
     const sp=Math.hypot(o.x-px,o.z-pz)/Math.max(dt,.001);if(sp>.3)o.bob+=dt*10;else o.bob*=.9;
-    o.av.g.position.set(o.x,P.floor===OUT?W.groundY(o.x,o.z):0,o.z);o.av.g.rotation.y=o.yaw;o.av.body.userData.pose(dt,Math.min(3,sp));o.av.label.material.opacity=o.idle?.5:1;
+    let jy=0;if(o.jt>0){o.jt=Math.max(0,o.jt-dt);const u=1-o.jt/.7;jy=4*.72*u*(1-u)}
+    o.av.g.position.set(o.x,(P.floor===OUT?W.groundY(o.x,o.z):0)+jy,o.z);o.av.g.rotation.y=o.yaw;o.av.body.userData.pose(dt,Math.min(5.5,sp),o.jt>0);o.av.label.material.opacity=o.idle?.5:1;
     if(o.bubbleT>0){o.bubbleT-=dt;o.av.bubble.material.opacity=Math.min(1,o.bubbleT*2);if(o.bubbleT<=0)o.av.bubble.visible=false}})};
 
 /* ---------- connect ---------- */

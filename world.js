@@ -109,7 +109,7 @@ FL.forEach((f,fi)=>{
   wallPiece(g,-1,z0-1.5,.95,1.3,1.75,new T.MeshStandardMaterial({map:pt,roughness:.8}),.02);
   const ht=ctex(560,760,(x,w,h)=>{x.fillStyle='#232a33';x.fillRect(0,0,w,h);x.fillStyle='#e8b23a';x.font=`62px ${DISP}`;x.textAlign='center';x.fillText('이렇게 다녀요',w/2,100);
     x.fillStyle='#e9eef3';x.font=`40px ${BODY}`;['왼쪽 조이스틱으로 걷기','화면을 끌어서 둘러보기','문을 탭하면 걸어가서 열기','엘리베이터로 층 이동'].forEach((l,i)=>x.fillText(l,w/2,230+i*110));
-    x.fillStyle='rgba(233,238,243,.6)';x.font=`30px ${BODY}`;x.fillText('PC: WASD · 방향키 · E',w/2,h-50)});
+    x.fillStyle='rgba(233,238,243,.6)';x.font=`30px ${BODY}`;x.fillText('PC: WASD · Space 점프 · Shift 달리기',w/2,h-50)});
   wallPiece(g,1,z0-1.5,.95,1.3,1.75,new T.MeshStandardMaterial({map:ht,roughness:.8}),.02);
   // plant + bench at the far end
   const pot=new T.Mesh(new T.CylinderGeometry(.22,.17,.45,20),new T.MeshStandardMaterial({color:0xd9cfc2,roughness:.7}));pot.position.set(-1.45,.225,z1+.5);g.add(pot);
@@ -304,7 +304,11 @@ scene.add(new T.HemisphereLight(0xfff3e0,0x3a2c22,.55));scene.add(new T.AmbientL
 
 /* ---------- player & input ---------- */
 const marker=new T.Mesh(new T.RingGeometry(.18,.28,28),new T.MeshBasicMaterial({color:0xffd34d,transparent:true,opacity:.9,depthWrite:false}));marker.rotation.x=-Math.PI/2;marker.visible=false;scene.add(marker);
-const P={dist:1,x:0,z:1,yaw:0,face:0,pitch:-.04,floor:0,bob:0,step:0,speed:0};
+const P={dist:1,x:0,z:1,yaw:0,face:0,pitch:-.04,floor:0,bob:0,step:0,speed:0,jy:0,vy:0,air:false,jc:0,run:false,runHold:false};
+function jump(){if(P.air||busy||!running)return;P.air=true;P.vy=P.run||P.runHold?4.6:4.2;P.jc=(P.jc+1)%1000;const t=H.now();H.noise(t,.08,'bandpass',900,1,.25);H.tone(330,t,.18,.1,'sine',{to:620,glide:.16});H.buzz(15)}
+function land(){const t=H.now();H.noise(t,.07,'lowpass',260,1,.5);H.tone(70,t,.09,.22,'sine',{to:45});H.buzz(30)}
+function setRun(v){P.run=v;const b=document.getElementById('wRun');if(b){b.setAttribute('aria-pressed',String(v));}}
+const isRun=()=>P.run||P.runHold;
 const angLerp=(a,b,k)=>a+((((b-a)+Math.PI*3)%(Math.PI*2))-Math.PI)*k;
 let auto=null,busy=false,running=false,raf=0,last=0,moved=false;
 const keys=new Set(),stick={x:0,y:0};
@@ -329,9 +333,15 @@ enterBtn.onclick=()=>{const d=nearest();if(d)openDoor(d)};
 
 addEventListener('keydown',e=>{if(!running||e.target.matches('input,textarea'))return;const k=e.key.toLowerCase();
   if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(k)){keys.add(k);auto=null;e.preventDefault()}
-  if(k==='e'||k==='enter'){const d=nearest();if(d){e.preventDefault();openDoor(d)}}});
-addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
-addEventListener('blur',()=>keys.clear());
+  if(k==='e'||k==='enter'){const d=nearest();if(d){e.preventDefault();openDoor(d)}}
+  if(e.code==='Space'){e.preventDefault();if(!e.repeat)jump()}
+  if(k==='shift'){P.runHold=true}
+  if(k==='r'&&!e.repeat){setRun(!P.run)}});
+addEventListener('keyup',e=>{keys.delete(e.key.toLowerCase());if(e.key==='Shift')P.runHold=false});
+addEventListener('blur',()=>{keys.clear();P.runHold=false});
+{const jb=$('wJump'),rb=$('wRun');
+ if(jb)jb.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();H.ac();jump()});
+ if(rb)rb.addEventListener('click',e=>{e.preventDefault();setRun(!P.run)})}
 
 // joystick
 const stickEl=$('wStick'),knobEl=stickEl.querySelector('i');let stickId=null;
@@ -373,21 +383,22 @@ function frame(n){raf=requestAnimationFrame(frame);const dt=Math.min(.05,last?(n
   if(auto&&!busy){const dx=auto.front.x-P.x,dz=auto.front.z-P.z,d=Math.hypot(dx,dz);
     if(auto.point&&d<=.12){auto=null;marker.visible=false}else{
     const want=d>.15||auto.point?Math.atan2(-dx,-dz):yawTo(auto.look.x,auto.look.z);let dy=((want-P.face+Math.PI*3)%(Math.PI*2))-Math.PI;P.face+=dy*Math.min(1,dt*8);P.yaw=angLerp(P.yaw,want,Math.min(1,dt*2.5));P.pitch+=(-.04-P.pitch)*Math.min(1,dt*3);
-    if(d>.08){const s=Math.min(2.6*dt,d);P.x+=dx/d*s;P.z+=dz/d*s;speed=s/dt;if(!moved){moved=true;helpEl.classList.add('gone')}}else if(!auto.point&&Math.abs(dy)<.06)openDoor(auto)}}
+    if(d>.08){const s=Math.min((isRun()?4.8:2.6)*dt,d);P.x+=dx/d*s;P.z+=dz/d*s;speed=s/dt;if(!moved){moved=true;helpEl.classList.add('gone')}}else if(!auto.point&&Math.abs(dy)<.06)openDoor(auto)}}
   else if(mx||mz){const len=Math.min(1,Math.hypot(mx,mz)),nx=mx/(Math.hypot(mx,mz)||1),nz=mz/(Math.hypot(mx,mz)||1);
-    const fx=-Math.sin(P.yaw),fz=-Math.cos(P.yaw),rx=Math.cos(P.yaw),rz=-Math.sin(P.yaw),sp=2.8*len*dt;
+    const fx=-Math.sin(P.yaw),fz=-Math.cos(P.yaw),rx=Math.cos(P.yaw),rz=-Math.sin(P.yaw),sp=(isRun()?5.2:2.8)*len*dt;
     const vx=fx*nz+rx*nx,vz=fz*nz+rz*nx;P.x+=vx*sp;P.z+=vz*sp;speed=sp/dt;P.face=angLerp(P.face,Math.atan2(-vx,-vz),Math.min(1,dt*10));
     if(nz>.3)P.yaw=angLerp(P.yaw,P.face,Math.min(1,dt*.8));if(!moved){moved=true;helpEl.classList.add('gone')}}
   if(fl.clamp)fl.clamp(P);else{P.x=Math.max(-fl.xb,Math.min(fl.xb,P.x));P.z=Math.max(fl.zMin,Math.min(fl.zMax,P.z))}
   {const gy=fl.outside?groundY(P.x,P.z):0;P.gy=(P.gy||0)+(gy-(P.gy||0))*Math.min(1,dt*12)}
+  if(P.air){P.vy-=12*dt;P.jy+=P.vy*dt;if(P.jy<=0){P.jy=0;P.vy=0;P.air=false;land()}}
   if(fl.outside)ANIMS.forEach(f=>f(dt,n/1000));
   if(fl.outside&&Math.random()<dt*.3){const t=H.now(),f=2600+Math.random()*1600;H.tone(f,t,.05,.04,'sine',{to:f*1.35,glide:.05});H.tone(f*1.1,t+.11,.05,.035,'sine',{to:f*1.5,glide:.05})}
-  if(speed>.2){P.bob+=dt*speed*3.4;P.step+=speed*dt;if(P.step>.72){P.step=0;stepSound()}}else P.bob*=.9;
+  if(speed>.2&&!P.air){P.bob+=dt*speed*3.4;P.step+=speed*dt;if(P.step>(speed>3.5?.95:.72)){P.step=0;stepSound()}}else P.bob*=.9;
   P.speed=speed;if(marker.visible){marker.scale.setScalar(Math.max(1,marker.scale.x-dt*2));marker.material.opacity=.6+.3*Math.sin(n/150);if(!auto)marker.visible=false}
   {const elev=Math.max(.06,Math.min(1.0,.3-P.pitch*.9)),D=(fl.outside?4.2:3.3)*P.dist,bx=Math.sin(P.yaw),bz=Math.cos(P.yaw);
    let cx=P.x+bx*D*Math.cos(elev),cz=P.z+bz*D*Math.cos(elev),cy=1.35+(P.gy||0)+D*Math.sin(elev);
    if(!fl.outside){cx=Math.max(-CW/2+.15,Math.min(CW/2-.15,cx));cz=Math.max(fl.z1+.15,Math.min(fl.z0-.15,cz));cy=Math.min(CH-.15,cy)}else{cz=Math.max(-1.6,cz)}
-   cam.position.set(cx,cy,cz);cam.lookAt(P.x,1.25+(P.gy||0),P.z)}
+   cam.position.set(cx,cy,cz);cam.position.y+=P.jy*.35;cam.lookAt(P.x,1.25+(P.gy||0)+P.jy*.5,P.z)}
   doors.forEach(d=>{if(d.floor!==P.floor)return;d.open+=(d.target-d.open)*Math.min(1,dt*(d.enter?4:7));if(d.enter){d.pivL.rotation.y=d.open*1.45;d.pivR.rotation.y=-d.open*1.45}else d.pivot.rotation.y=d.open*1.35});
   const nd=busy?null:nearest();if(nd){enterBtn.hidden=false;enterBtn.querySelector('span').textContent=nd.r.title}else enterBtn.hidden=true;
   if(H.world&&H.world.tick)H.world.tick(dt,running);
@@ -400,7 +411,7 @@ const api={
     if(d){setFloor(d.floor);P.x=d.front.x;P.z=d.front.z;P.yaw=P.face=yawTo(d.look.x,d.look.z);P.pitch=-.04;d.open=1;d.target=0;
       setTimeout(()=>{const t=H.now();H.noise(t,.05,'lowpass',400,1,.6,{wet:true});H.tone(95,t,.15,.3,'sine',{to:55});H.buzz(25)},380)}
     fadeEl.style.opacity=0;if(!raf){last=0;raf=requestAnimationFrame(frame)}},
-  hide(){running=false;worldEl.hidden=true;cancelAnimationFrame(raf);raf=0;auto=null;busy=false;keys.clear();stick.x=stick.y=0}
+  hide(){running=false;P.jy=0;P.vy=0;P.air=false;P.runHold=false;worldEl.hidden=true;cancelAnimationFrame(raf);raf=0;auto=null;busy=false;keys.clear();stick.x=stick.y=0}
 };
 Object.assign(api,{T,scene,cam,P,doors,floors,OUT,groundY,isRunning:()=>running});
 return api;
