@@ -21,12 +21,13 @@ root.innerHTML=`
 @keyframes csb{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-4px);opacity:1}}
 .cs-help{align-self:stretch;background:#fff;border:2px solid #e8743b;color:#3b2a1c;border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.6}
 .cs-help b{color:#c2410c}.cs-help a{color:#c2410c;font-weight:700}
+.cs-call{display:flex;gap:8px;margin:8px 0 4px;flex-wrap:wrap}.cs-call a{flex:1;min-width:120px;text-align:center;padding:11px 8px;border-radius:12px;background:#e8743b;color:#fff!important;text-decoration:none;font-size:16px}
 .cs-fly{position:fixed;pointer-events:none;z-index:30;font-size:15px;color:#2a1a0e;transition:transform 1.6s cubic-bezier(.2,.6,.3,1),opacity 1.6s;will-change:transform}
 @media (prefers-reduced-motion:reduce){.cs-typing i{animation:none}.cs-fly{transition:none}}
 </style>
 <div class="cs-wrap">
   <div class="cs-portrait" data-r="por"><canvas data-r="cv"></canvas><span class="cs-name">마음 선생님</span></div>
-  <p class="cs-note">마음 선생님은 이야기를 들어 주는 연습 상대예요. 이 대화는 저장되지 않고 이 기기 밖으로 나가지 않으며, 방을 나가면 사라져요. 진짜 상담이 필요하면 학교 Wee클래스 선생님이나 청소년상담전화 1388에 이야기해요.</p>
+  <p class="cs-note">마음 선생님은 이야기를 들어 주는 연습 상대예요. 이 대화는 저장되지 않고 이 기기 밖으로 나가지 않으며, 방을 나가면 사라져요. 진짜 상담이 필요하면 <b>1388</b>(청소년상담)이나 <b>109</b>(자살예방상담)로 전화해요. 학교 Wee클래스 선생님께 이야기해도 좋아요.</p>
   <div class="cs-log" data-r="log" aria-live="polite"></div>
   <div class="row" data-r="chips">
     ${['공부·시험','친구 관계','가족','진로·꿈','나 자신이 싫어요','그냥 답답해요'].map(t=>`<button class="chip" data-topic="${t}">${t}</button>`).join('')}
@@ -87,10 +88,10 @@ function teacher(lines,extra){busy=true;const ty=document.createElement('div');t
     setTimeout(()=>{ty.remove();add('cs-t',txt);talk=1.5;nod=1;const t=H.now();H.tone(740,t,.12,.05,'sine',{wet:true});H.buzz(8);i++;
       if(i<arr.length){log.appendChild(ty);log.scrollTop=log.scrollHeight;next()}else{busy=false;extra&&extra()}},wait)};next()}
 function helpCard(kind){if(helpShown[kind])return;helpShown[kind]=1;const d=document.createElement('div');d.className='cs-help';
-  d.innerHTML=kind==='safety'?`<b>지금 많이 힘들다면, 혼자 견디지 않아도 돼요.</b><br>
+  d.innerHTML=kind==='safety'?`<b>지금 많이 힘들다면, 혼자 견디지 않아도 돼요.</b><div class="cs-call"><a href="tel:1388">📞 1388 전화하기</a><a href="tel:109">📞 109 전화하기</a></div>
     · 자살예방상담전화 <a href="tel:109">109</a> (24시간)<br>· 청소년상담전화 <a href="tel:1388">1388</a> · 문자 #1388 · 카카오톡 '청소년상담1388'<br>
     · 지금 위험하다면 <a href="tel:119">119</a> 또는 <a href="tel:112">112</a><br>· 담임 선생님이나 학교 Wee클래스 상담 선생님께 "이야기하고 싶어요" 한마디만 해도 돼요.`
-   :`<b>몸이나 마음이 다치는 일을 겪고 있다면 꼭 어른에게 알려요.</b><br>
+   :`<b>몸이나 마음이 다치는 일을 겪고 있다면 꼭 어른에게 알려요.</b><div class="cs-call"><a href="tel:1388">📞 1388 전화하기</a><a href="tel:112">📞 112 전화하기</a></div>
     · 지금 위험하다면 <a href="tel:112">112</a><br>· 청소년상담전화 <a href="tel:1388">1388</a> · 문자 #1388<br>· 학교폭력 신고·상담 <a href="tel:117">117</a><br>· 믿을 수 있는 선생님이나 Wee클래스 상담 선생님께 이야기해요.`;
   log.appendChild(d);log.scrollTop=log.scrollHeight}
 
@@ -157,11 +158,11 @@ const SWEAR=/(씨발|시발|ㅅㅂ|병신|ㅂㅅ|좆|존나|개새|새끼)/;
 let turns=0,topic=null,tipGiven={},lastTopicTurn=0;
 const quote=s=>{const t=s.length>22?s.slice(0,22)+'…':s;return`"${t}"`};
 function reply(raw){const s=N(raw);turns++;
-  if(RISK.test(s)){riskSeen=true;helpCard('safety');return['그 말을 꺼내기까지 정말 많이 힘들었을 것 같아. 말해 줘서 고마워.','너는 소중한 사람이야. 이 마음은 혼자 견디기엔 너무 무거워. 위에 있는 전화나 문자로 지금 바로 이야기할 수 있어.','그리고 오늘 꼭, 믿을 수 있는 어른 한 명에게 "나 요즘 많이 힘들어"라고 말해 줄래? 그게 너를 지키는 첫걸음이야.']}
-  if(HARM.test(s)){helpCard('harm');return['그런 일을 겪었다면 정말 무서웠겠다. 네 잘못이 아니야.','이건 어른이 꼭 알아야 하는 일이야. 위에 있는 곳으로 연락하거나, 오늘 믿을 수 있는 선생님께 꼭 알려 줘.']}
-  if(THANKS.test(s)&&turns>1)return riskSeen?['나도 이야기해 줘서 정말 고마워. 오늘 용기 낸 너, 정말 잘했어.','아까 이야기한 것처럼 오늘 꼭 믿을 수 있는 어른 한 명에게 이야기해 줘. 109와 1388은 언제든 열려 있어. 너는 혼자가 아니야.']
+  if(RISK.test(s)){riskSeen=true;helpCard('safety');return['그 말을 꺼내기까지 정말 많이 힘들었을 것 같아. 말해 줘서 고마워.','너는 소중한 사람이야. 이 마음은 혼자 견디기엔 너무 무거워.','지금 바로 1388이나 109로 전화해 줘. 위에 있는 버튼을 누르면 바로 걸 수 있어. 전화가 어려우면 문자 #1388도 괜찮아.','그리고 오늘 꼭, 믿을 수 있는 어른 한 명에게 "나 요즘 많이 힘들어"라고 말해 줄래? 그게 너를 지키는 첫걸음이야.']}
+  if(HARM.test(s)){helpCard('harm');return['그런 일을 겪었다면 정말 무서웠겠다. 네 잘못이 아니야.','이건 어른이 꼭 알아야 하는 일이야. 지금 1388로 전화해 줘. 위험한 상황이면 112로 전화해 줘.','그리고 오늘 믿을 수 있는 선생님께도 꼭 알려 줘.']}
+  if(THANKS.test(s)&&turns>1)return riskSeen?['나도 이야기해 줘서 정말 고마워. 오늘 용기 낸 너, 정말 잘했어.','힘든 마음이 다시 들면 꼭 1388이나 109로 전화해 줘. 언제든 받아 줄 거야. 그리고 오늘 믿을 수 있는 어른 한 명에게도 이야기해 줘. 너는 혼자가 아니야.']
     :[say(['나도 이야기 나눠서 고마워. 마음이 조금이라도 가벼워졌다면 다행이야.','오늘 용기 내서 이야기한 너, 정말 잘했어.']),'힘들 땐 언제든 다시 와. 다음엔 3층 응원 벽에 한 줄 남겨 보는 것도 좋아.'];
-  if(SOFT.test(s)&&!softAsked){softAsked=true;return['그만큼 지치고 버거웠구나. 그런 마음이 드는 게 이상한 게 아니야.','하나만 물어볼게. 혹시 너무 힘들어서 사라지고 싶다는 생각까지 들 때가 있어? 그렇다면 솔직하게 말해 줘도 괜찮아. 함께 방법을 찾아볼게.']}
+  if(SOFT.test(s)&&!softAsked){softAsked=true;return['그만큼 지치고 버거웠구나. 그런 마음이 드는 게 이상한 게 아니야.','하나만 물어볼게. 혹시 너무 힘들어서 사라지고 싶다는 생각까지 들 때가 있어? 그렇다면 솔직하게 말해 줘도 괜찮아.','그런 마음이 든다면 혼자 견디지 말고 1388이나 109로 전화해 줘. 이야기를 들어 줄 사람이 늘 기다리고 있어.']}
   if(ASKME.test(s))return[say(['나한테 관심 가져 줘서 고마워. 그래도 오늘은 네 이야기를 더 듣고 싶어.','선생님도 힘든 날이 있지. 그럴 땐 누군가에게 털어놓아. 지금 너처럼 말이야.']),'요즘 너는 어떻게 지내?'];
   const out=[];if(SWEAR.test(s))out.push(say(['욕이 나올 만큼 정말 속상하고 화가 났구나.','그만큼 마음이 터질 것 같았나 보다.']));
   const T=TOPICS.find(t=>t.re.test(s));
