@@ -377,7 +377,7 @@ function groundY(x,z){ // 현관 단과 돌계단 높이
   floors.push({g,elevHits:[],walk:[ground,plaza,path,field],name:'스트레스 마음정비소 앞',no:'밖',xb:34,zMin:FZ+.9,zMax:30,outside:true,
     clamp(P){P.x=Math.max(-38,Math.min(44.5,P.x));P.z=Math.min(30,P.z);const minZ=Math.abs(P.x)<13.6?FZ+.9:-12;if(P.z<minZ)P.z=minZ}});
   /* ----- 입구 옆: 한문 김선생 온라인 서당 표지판 (누르면 링크로) ----- */
-  {const SX=-4.5,SZ=4.6,url='https://abit.ly/'+encodeURIComponent('스트레스');
+  {const SX=-4.5,SZ=4.6,url='https://abit.ly/'+encodeURIComponent('온라인서당');
    const sdT=ctex(640,380,(x,w,h)=>{x.fillStyle='#3a2414';x.fillRect(0,0,w,h);x.fillStyle='#f5ead2';x.fillRect(14,14,w-28,h-28);
      x.strokeStyle='#8a5a2b';x.lineWidth=6;x.strokeRect(26,26,w-52,h-52);
      x.fillStyle='#b5332b';x.fillRect(w-110,40,62,62);x.fillStyle='#f5ead2';x.font=`40px "Noto Serif KR","Batang",serif`;x.textAlign='center';x.textBaseline='middle';x.fillText('書',w-79,73);
