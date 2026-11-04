@@ -239,7 +239,7 @@ function groundY(x,z){ // 현관 단과 돌계단 높이
   const trunkM=M(0x6e4b31),leafM=[M(0x5d9a45),M(0x74ad55),M(0x4c8a3d)];
   const tree=(x,z,s=1)=>{const t=new T.Mesh(new T.CylinderGeometry(.16*s,.24*s,2.4*s,8),trunkM);t.position.set(x,1.2*s,z);g.add(t);
     [[0,3,0,1.5],[.7,2.6,.3,1.1],[-.6,2.7,-.3,1.2],[0,3.8,0,1]].forEach(([a,b,c,r],k)=>{const m=new T.Mesh(new T.SphereGeometry(r*s,10,8),leafM[(k+Math.abs(x|0))%3]);m.position.set(x+a*s,b*s,z+c*s);g.add(m)})};
-  [[-15,-4],[-28,-3],[15,-5],[-9,33],[10,34],[-36,8],[-34,20],[38,4],[38,16],[-15,30]].forEach(([x,z])=>tree(x,z,1.2));
+  [[-15,-4],[-28,-3],[15,-5],[-9,33],[10,34],[-36,8],[-34,20],[49,2],[49,22],[-15,30]].forEach(([x,z])=>tree(x,z,1.2));
   /* ----- soccer field (오른쪽) ----- */
   const FX=23,FZc=12,FWd=20,FLn=28;
   const fieldT=ctex(512,720,(x,w,h)=>{for(let i=0;i<12;i++){x.fillStyle=i%2?'#6aa548':'#77b253';x.fillRect(0,i*h/12,w,h/12)}grain(x,w,h,8);
@@ -258,6 +258,31 @@ function groundY(x,z){ // 현관 단과 돌계단 높이
     g.add(r);runners.push({r,legs,ph:i*.9,rx:4+i%3*1.6,rz:7+i%4*1.5,sp:.18+i*.02})});
   ANIMS.push((dt,t)=>{runners.forEach(o=>{const a=t*o.sp+o.ph;const x=FX+Math.cos(a)*o.rx,z=FZc+Math.sin(a)*o.rz;o.r.position.set(x,Math.abs(Math.sin(t*9+o.ph))*.06,z);
     o.r.rotation.y=Math.atan2(-(-Math.sin(a)*o.rx),-(Math.cos(a)*o.rz));const sw=Math.sin(t*9+o.ph)*.6;o.legs[0].rotation.x=sw;o.legs[1].rotation.x=-sw})});
+  /* ----- 승부차기 구역 (운동장 오른쪽 옆) ----- */
+  const PKX=41,PKZ=12;
+  const pkT=ctex(256,448,(x,w,h)=>{for(let i=0;i<8;i++){x.fillStyle=i%2?'#5f9e45':'#6cab50';x.fillRect(0,i*h/8,w,h/8)}grain(x,w,h,8);
+    x.strokeStyle='#fff';x.lineWidth=5;x.strokeRect(8,8,w-16,h-16);x.strokeRect(w*.2,8,w*.6,h*.32);x.strokeRect(w*.36,8,w*.28,h*.12);x.beginPath();x.arc(w/2,h*.4,36,.2*Math.PI,.8*Math.PI);x.stroke();x.fillStyle='#fff';x.beginPath();x.arc(w/2,h*.27,6,0,7);x.fill()});
+  const pk=new T.Mesh(new T.PlaneGeometry(7.4,13),new T.MeshStandardMaterial({map:pkT,roughness:1}));pk.rotation.x=-Math.PI/2;pk.position.set(PKX,.017,PKZ);g.add(pk);
+  const gzP=PKZ-6.1,gwP=3.6;[[-gwP/2],[gwP/2]].forEach(([dx])=>box(.12,1.9,.12,white,PKX+dx,.95,gzP));box(gwP+.12,.12,.12,white,PKX,1.9,gzP);
+  [-1,1].forEach(s=>box(.06,.06,1.1,white,PKX+s*gwP/2,1.9,gzP-.55));
+  const pkNet=new T.Mesh(new T.PlaneGeometry(gwP,1.9),new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.28,side:T.DoubleSide}));pkNet.position.set(PKX,.95,gzP-1.1);g.add(pkNet);
+  const pkNetTop=new T.Mesh(new T.PlaneGeometry(gwP,1.1),pkNet.material);pkNetTop.rotation.x=Math.PI/2;pkNetTop.position.set(PKX,1.9,gzP-.55);g.add(pkNetTop);
+  // 골키퍼
+  const kp=new T.Group();const kb=new T.Mesh(new T.CylinderGeometry(.2,.22,.72,8),M(0xf07c2a));kb.position.y=1.0;kp.add(kb);
+  const kh=new T.Mesh(new T.SphereGeometry(.17,10,8),M(0xe8b98f));kh.position.y=1.55;kp.add(kh);
+  const kl=new T.Mesh(new T.CylinderGeometry(.2,.2,.62,8),M(0x22262e));kl.position.y=.33;kp.add(kl);
+  const karms=[-1,1].map(s=>{const a=new T.Group();a.position.set(s*.24,1.28,0);const m=new T.Mesh(new T.CylinderGeometry(.06,.06,.5,6),M(0xf07c2a));m.position.y=-.25;a.add(m);
+    const gl=new T.Mesh(new T.SphereGeometry(.09,8,6),M(0xc6f24a));gl.position.y=-.52;a.add(gl);a.rotation.z=s*2.2;kp.add(a);return a});
+  kp.position.set(PKX,0,gzP+.3);g.add(kp);
+  const pkBall=new T.Mesh(new T.IcosahedronGeometry(.17,1),new T.MeshStandardMaterial({color:0xffffff,roughness:.5,flatShading:true}));pkBall.position.set(PKX,.17,PKZ-2.6);g.add(pkBall);
+  ANIMS.push((dt,t)=>{kp.position.x=PKX+Math.sin(t*1.6)*.9;karms.forEach((a,i)=>a.rotation.z=(i?1:-1)*(2.0+Math.sin(t*3+i)*.25));pkBall.rotation.y+=dt*.3});
+  // 간판
+  const pkSignT=ctex(512,300,(x,w,h)=>{x.fillStyle='#14304f';x.fillRect(0,0,w,h);x.fillStyle='#4fd18b';x.fillRect(0,0,w,18);x.fillStyle='#fff';x.textAlign='center';
+    x.font=`96px ${EMO}`;x.fillText('⚽',w*.18,150);x.font=`76px ${DISP}`;x.fillText('승부차기',w*.6,138);x.fillStyle='#ffd23f';x.font=`34px ${BODY}`;x.fillText('공 앞에 서면 시작!',w/2,230)});
+  const pkSign=new T.Mesh(new T.PlaneGeometry(2.1,1.23),new T.MeshStandardMaterial({map:pkSignT,roughness:.7}));pkSign.position.set(PKX-4.3,1.75,PKZ+3.2);pkSign.rotation.y=-Math.PI/2+.5;g.add(pkSign);
+  {const ry=pkSign.rotation.y,lx=Math.cos(ry),lz=-Math.sin(ry),legM=M(0x2f2924,{r:.5,m:.4});[-1,1].forEach(k=>box(.08,1.2,.08,legM,PKX-4.3+k*.9*lx,.6,PKZ+3.2+k*.9*lz-.02))}
+  const pkPiv=new T.Group();g.add(pkPiv);
+  doors.push({id:'penalty',r:H.rooms.penalty||{title:'승부차기'},floor:OUT,pivot:pkPiv,open:0,target:0,front:{x:PKX,z:PKZ-1.5},look:{x:PKX,z:gzP},hits:[pkSign,pkBall,kb,kh,pkNet],badgePos:{x:PKX,y:2.8,z:gzP+.3}});
   /* ----- eco garden (왼쪽) ----- */
   const GX=-21,GZ=11;
   const water=new T.Mesh(new T.CircleGeometry(6,40),M(0x4f8f8a,{r:.08,m:.35,t:.9}));water.rotation.x=-Math.PI/2;water.scale.set(1.35,1,1);water.position.set(GX,.03,GZ);g.add(water);
@@ -288,7 +313,7 @@ function groundY(x,z){ // 현관 단과 돌계단 높이
   const gs=new T.Mesh(new T.PlaneGeometry(1.6,.62),new T.MeshStandardMaterial({map:gsT}));gs.position.set(GX+9.5,1.25,GZ+6);gs.rotation.y=-.6;g.add(gs);box(.08,1,.08,woodM,GX+9.5,.5,GZ+6);
   /* ----- welcome board, lamps, benches ----- */
   const boardT=ctex(512,384,(x,w,h)=>{x.fillStyle='#fffaf0';x.fillRect(0,0,w,h);x.fillStyle=FL[0].c;x.fillRect(0,0,w,80);x.fillStyle='#fff';x.font=`48px ${DISP}`;x.textAlign='center';x.fillText('어서 와요!',w/2,58);
-    x.fillStyle='#2a2018';x.font=`32px ${BODY}`;['1F 터뜨리는 방','2F 쉬어가는 방','3F 함께하는 방'].forEach((l,i)=>x.fillText(l,w/2,140+i*52));x.fillStyle=FL[0].c;x.font=`28px ${DISP}`;x.fillText('현관 문을 탭하면 들어가요',w/2,h-26)});
+    x.fillStyle='#2a2018';x.font=`32px ${BODY}`;['1F 터뜨리는 방','2F 쉬어가는 방','3F 함께하는 방','⚽ 운동장 옆 승부차기'].forEach((l,i)=>x.fillText(l,w/2,132+i*48));x.fillStyle=FL[0].c;x.font=`28px ${DISP}`;x.fillText('현관 문을 탭하면 들어가요',w/2,h-26)});
   const board=new T.Mesh(new T.PlaneGeometry(1.3,.98),new T.MeshStandardMaterial({map:boardT,roughness:.8}));board.position.set(-2.4,1.35,15);board.rotation.y=.35;g.add(board);
   const poleM=M(0x2f2924,{r:.5,m:.4}),bulbM=new T.MeshBasicMaterial({color:0xfff2cc});
   [[-2.4,9],[2.4,9],[-2.4,18],[2.4,18],[-2.4,26],[2.4,26]].forEach(([x,z])=>{const p=new T.Mesh(new T.CylinderGeometry(.06,.08,3.2,8),poleM);p.position.set(x,1.6,z);g.add(p);const b=new T.Mesh(new T.SphereGeometry(.2,12,10),bulbM);b.position.set(x,3.3,z);g.add(b)});
@@ -296,7 +321,7 @@ function groundY(x,z){ // 현관 단과 돌계단 높이
   /* ----- light ----- */
   const sun=new T.DirectionalLight(0xfff4e0,1.0);sun.position.set(-20,40,30);g.add(sun);g.add(new T.AmbientLight(0xdfefff,.3));
   floors.push({g,elevHits:[],walk:[ground,plaza,path,field],name:'스트레스 마음정비소 앞',no:'밖',xb:34,zMin:FZ+.9,zMax:30,outside:true,
-    clamp(P){P.x=Math.max(-38,Math.min(36,P.x));P.z=Math.min(30,P.z);const minZ=Math.abs(P.x)<13.6?FZ+.9:-12;if(P.z<minZ)P.z=minZ}});
+    clamp(P){P.x=Math.max(-38,Math.min(44.5,P.x));P.z=Math.min(30,P.z);const minZ=Math.abs(P.x)<13.6?FZ+.9:-12;if(P.z<minZ)P.z=minZ}});
   doors.push({id:'__enter',enter:true,r:{title:'스트레스 마음정비소'},floor:OUT,pivL,pivR,open:0,target:0,front:{x:0,z:FZ+1.6},look:{x:0,z:FZ-1},hits:[L,R,back,fan,arch,fascia]});
 })();
 

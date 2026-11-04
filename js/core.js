@@ -119,13 +119,15 @@ H.buildHub=()=>{
   const floors=[
     {no:'1F',name:'터뜨리는 방',desc:'세게 치고, 깨고, 갈아 버려요',c:'var(--f1)'},
     {no:'2F',name:'쉬어가는 방',desc:'천천히, 손끝으로 가라앉혀요',c:'var(--f2)'},
-    {no:'3F',name:'함께하는 방',desc:'나누고, 쉬고, 숨 고르기',c:'var(--f3)'}];
+    {no:'3F',name:'함께하는 방',desc:'나누고, 쉬고, 숨 고르기',c:'var(--f3)'},
+    {no:'밖',name:'운동장',desc:'건물 밖, 운동장 옆에서 뛰어놀아요',c:'#4fa35a',key:0,plate:'야외'}];
   const host=document.getElementById('floors');host.innerHTML='';
   floors.forEach((f,fi)=>{const sec=document.createElement('section');sec.className='floor';sec.style.setProperty('--c',f.c);
     sec.innerHTML=`<div class="floor-head"><span class="no">${f.no}</span><h3>${f.name}</h3><span>${f.desc}</span></div><div class="doors"></div>`;
     const doors=sec.querySelector('.doors');let n=1;
-    ORDER.filter(id=>ROOMS[id].floor===fi+1).forEach(id=>{const r=ROOMS[id];const a=document.createElement('a');a.className='door';a.href='#'+id;
-      a.innerHTML=`<span class="plate">${fi+1}0${n++}호</span><span class="ic" aria-hidden="true">${r.icon}</span><div><b>${H.esc(r.title)}</b><small>${H.esc(r.blurb)}</small></div>`;
+    const key=f.key??fi+1;const ids=ORDER.filter(id=>ROOMS[id].floor===key);if(!ids.length)return;
+    ids.forEach(id=>{const r=ROOMS[id];const a=document.createElement('a');a.className='door';a.href='#'+id;
+      a.innerHTML=`<span class="plate">${f.plate?f.plate+' '+(n++):`${fi+1}0${n++}호`}</span><span class="ic" aria-hidden="true">${r.icon}</span><div><b>${H.esc(r.title)}</b><small>${H.esc(r.blurb)}</small></div>`;
       doors.appendChild(a)});
     host.appendChild(sec)})};
 })();
