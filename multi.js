@@ -119,7 +119,7 @@ const badgeTexCache={};
 function badgeTex(n){if(badgeTexCache[n])return badgeTexCache[n];const c=document.createElement('canvas');c.width=256;c.height=128;const x=c.getContext('2d');
   x.fillStyle='#7ee0a8';H.rr(x,8,8,240,112,56);x.fill();x.fillStyle='#10301f';x.font=`64px ${DISP}`;x.textAlign='center';x.textBaseline='middle';x.fillText(`👥 ${n}`,128,68);
   const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;return badgeTexCache[n]=t}
-doors.forEach(d=>{if(d.enter)return;const s=new T.Sprite(new T.SpriteMaterial({depthWrite:false}));s.scale.set(.6,.3,1);
+doors.forEach(d=>{if(d.enter||d.link)return;const s=new T.Sprite(new T.SpriteMaterial({depthWrite:false}));s.scale.set(.6,.3,1);
   const side=d.front.x<0?-1:1;if(d.badgePos)s.position.set(d.badgePos.x,d.badgePos.y,d.badgePos.z);else s.position.set(side*1.85,2.75,d.front.z);s.visible=false;floors[d.floor].g.add(s);d.badge=s});
 function refreshCounts(){const cnt={};others.forEach(o=>{if(o.rm)cnt[o.rm]=(cnt[o.rm]||0)+1});
   doors.forEach(d=>{if(!d.badge)return;const n=cnt[d.id]||0;d.badge.visible=n>0;if(n){d.badge.material.map=badgeTex(n);d.badge.material.needsUpdate=true}});

@@ -376,6 +376,22 @@ function groundY(x,z){ // 현관 단과 돌계단 높이
   const sun=new T.DirectionalLight(0xfff4e0,1.0);sun.position.set(-20,40,30);g.add(sun);g.add(new T.AmbientLight(0xdfefff,.3));
   floors.push({g,elevHits:[],walk:[ground,plaza,path,field],name:'스트레스 마음정비소 앞',no:'밖',xb:34,zMin:FZ+.9,zMax:30,outside:true,
     clamp(P){P.x=Math.max(-38,Math.min(44.5,P.x));P.z=Math.min(30,P.z);const minZ=Math.abs(P.x)<13.6?FZ+.9:-12;if(P.z<minZ)P.z=minZ}});
+  /* ----- 입구 옆: 한문 김선생 온라인 서당 표지판 (누르면 링크로) ----- */
+  {const SX=-4.5,SZ=4.6,url='https://abit.ly/'+encodeURIComponent('스트레스');
+   const sdT=ctex(640,380,(x,w,h)=>{x.fillStyle='#3a2414';x.fillRect(0,0,w,h);x.fillStyle='#f5ead2';x.fillRect(14,14,w-28,h-28);
+     x.strokeStyle='#8a5a2b';x.lineWidth=6;x.strokeRect(26,26,w-52,h-52);
+     x.fillStyle='#b5332b';x.fillRect(w-110,40,62,62);x.fillStyle='#f5ead2';x.font=`40px "Noto Serif KR","Batang",serif`;x.textAlign='center';x.textBaseline='middle';x.fillText('書',w-79,73);
+     x.fillStyle='#3a2414';x.font=`46px ${DISP}`;x.fillText('한문 김선생의',w/2-30,92);
+     x.fillStyle='#b5332b';x.font=`72px ${DISP}`;x.fillText('온라인 서당',w/2,180);
+     x.fillStyle='#3a2414';x.font=`40px ${DISP}`;x.fillText('놀러가기',w/2,256);
+     x.fillStyle='#b5332b';const bw=200,bh=54;x.beginPath();x.roundRect?x.roundRect(w/2-bw/2,286,bw,bh,27):x.rect(w/2-bw/2,286,bw,bh);x.fill();x.fillStyle='#fff';x.font=`32px ${DISP}`;x.fillText('👆 클릭',w/2,314)});
+   const sd=new T.Mesh(new T.PlaneGeometry(2.3,1.37),new T.MeshStandardMaterial({map:sdT,roughness:.75}));sd.position.set(SX,1.75,SZ);sd.rotation.y=.28;g.add(sd);
+   const back=new T.Mesh(new T.BoxGeometry(2.42,1.49,.08),M(0x3a2414,{r:.7}));back.position.set(SX-Math.sin(.28)*.05,1.75,SZ-Math.cos(.28)*.05);back.rotation.y=.28;g.add(back);
+   const roofS=new T.Mesh(new T.BoxGeometry(2.8,.12,.5),M(0x2a1a10,{r:.7}));roofS.position.set(SX,2.55,SZ-.05);roofS.rotation.y=.28;g.add(roofS);
+   {const lx=Math.cos(.28),lz=-Math.sin(.28),legM=M(0x3a2414,{r:.7});[-1,1].forEach(k=>box(.1,1.1,.1,legM,SX+k*1.05*lx,.55,SZ+k*1.05*lz-.06))}
+   const glowM=new T.MeshBasicMaterial({color:0xffd23f,transparent:true,opacity:0});const glow=new T.Mesh(new T.PlaneGeometry(2.5,1.57),glowM);glow.position.set(SX+Math.sin(.28)*.01,1.75,SZ+Math.cos(.28)*.01-.06);glow.rotation.y=.28;g.add(glow);
+   ANIMS.push((dt,t)=>{glowM.opacity=.18+.14*Math.sin(t*3)});
+   doors.push({id:'__seodang',link:url,r:{title:'한문 김선생의 온라인 서당'},floor:OUT,pivot:new T.Group(),open:0,target:0,front:{x:SX+.6,z:SZ+1.7},look:{x:SX,z:SZ},hits:[sd,back]})}
   doors.push({id:'__enter',enter:true,r:{title:'스트레스 마음정비소'},floor:OUT,pivL,pivR,open:0,target:0,front:{x:0,z:FZ+1.6},look:{x:0,z:FZ-1},hits:[L,R,back,fan,arch,fascia]});
 })();
 
@@ -400,7 +416,8 @@ function goFloor(fi){if(fi===P.floor||busy)return;busy=true;auto=null;const t=H.
 function placeStart(fi){if(fi===OUT){P.x=0;P.z=20}else{P.x=0;P.z=floors[fi].z0-1}P.yaw=0;P.face=0;P.pitch=-.04}
 document.querySelectorAll('[data-fl]').forEach(b=>b.onclick=()=>{const n=+b.dataset.fl;goFloor(n===0?OUT:n-1)});
 const yawTo=(x,z)=>Math.atan2(-(x-P.x),-(z-P.z));
-function openDoor(d){if(busy)return;busy=true;auto=null;enterBtn.hidden=true;d.target=1;
+function openLink(d){H.ui('btn');try{window.open(d.link,'_blank','noopener')}catch(e){location.href=d.link}}
+function openDoor(d){if(d.link){auto=null;openLink(d);return}if(busy)return;busy=true;auto=null;enterBtn.hidden=true;d.target=1;
   if(d.enter){const t=H.now();H.noise(t,.7,'bandpass',900,.6,.3,{atk:.1});H.tone(659,t+.15,.5,.1,'sine',{wet:true});H.tone(988,t+.4,.7,.1,'sine',{wet:true});H.buzz([30,50,30]);
     setTimeout(()=>fade(()=>{busy=false;d.target=0;d.open=0;setFloor(0);placeStart(0);const tt=H.now();H.tone(523,tt,.4,.08,'sine',{wet:true});H.tone(784,tt+.12,.6,.08,'sine',{wet:true})}),900);return}
   H.ui('door');setTimeout(()=>fade(()=>{busy=false;location.hash=d.id}),620)}
@@ -444,7 +461,7 @@ cv.addEventListener('pointerup',e=>{if(!look||e.pointerId!==look.id)return;const
     if(wh){const x=Math.max(-fl.xb,Math.min(fl.xb,wh.point.x)),z=Math.max(fl.zMin,Math.min(fl.zMax,wh.point.z));auto={point:true,front:{x,z}};marker.position.set(x,.03,z);marker.visible=true;marker.scale.setScalar(1.4);H.ui('tap')}
     else H.ui('tap');return}
   if(fl.elevHits.includes(res.object)){goFloor((P.floor+1)%3);return}
-  const d=hitsD.find(o=>o.m===res.object).d;if(Math.hypot(d.front.x-P.x,d.front.z-P.z)<.25)openDoor(d);else walkTo(d)});
+  const d=hitsD.find(o=>o.m===res.object).d;if(d.link){openLink(d);return}if(Math.hypot(d.front.x-P.x,d.front.z-P.z)<.25)openDoor(d);else walkTo(d)});
 cv.addEventListener('pointercancel',()=>{look=null});
 cv.addEventListener('wheel',e=>{e.preventDefault();P.dist=Math.max(.45,Math.min(1.8,P.dist*Math.exp(e.deltaY*.001)));H.ui('slide')},{passive:false});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
@@ -479,7 +496,7 @@ function frame(n){raf=requestAnimationFrame(frame);const dt=Math.min(.05,last?(n
    if(!fl.outside){cx=Math.max(-CW/2+.15,Math.min(CW/2-.15,cx));cz=Math.max(fl.z1+.15,Math.min(fl.z0-.15,cz));cy=Math.min(CH-.15,cy)}else{if(Math.abs(cx)<14.5)cz=Math.max(-1.6,cz);else cz=Math.max(-12.5,cz)}
    cam.position.set(cx,cy,cz);cam.position.y+=P.jy*.35;cam.lookAt(P.x,1.25+(P.gy||0)+P.jy*.5,P.z)}
   doors.forEach(d=>{if(d.floor!==P.floor)return;d.open+=(d.target-d.open)*Math.min(1,dt*(d.enter?4:7));if(d.enter){d.pivL.rotation.y=d.open*1.45;d.pivR.rotation.y=-d.open*1.45}else d.pivot.rotation.y=d.open*1.35});
-  const nd=busy?null:nearest();if(nd){enterBtn.hidden=false;enterBtn.querySelector('span').textContent=nd.r.title}else enterBtn.hidden=true;
+  const nd=busy?null:nearest();if(nd){enterBtn.hidden=false;const html=nd.link?'📜 <span>온라인 서당</span> 놀러가기':'🚪 <span></span> 들어가기';if(enterBtn._mode!==html){enterBtn._mode=html;enterBtn.innerHTML=html}if(!nd.link)enterBtn.querySelector('span').textContent=nd.r.title}else enterBtn.hidden=true;
   if(H.world&&H.world.tick)H.world.tick(dt,running);
   renderer.render(scene,cam)}
 
