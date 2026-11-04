@@ -258,41 +258,47 @@ function groundY(x,z){ // 현관 단과 돌계단 높이
     g.add(r);runners.push({r,legs,ph:i*.9,rx:4+i%3*1.6,rz:7+i%4*1.5,sp:.18+i*.02})});
   ANIMS.push((dt,t)=>{runners.forEach(o=>{const a=t*o.sp+o.ph;const x=FX+Math.cos(a)*o.rx,z=FZc+Math.sin(a)*o.rz;o.r.position.set(x,Math.abs(Math.sin(t*9+o.ph))*.06,z);
     o.r.rotation.y=Math.atan2(-(-Math.sin(a)*o.rx),-(Math.cos(a)*o.rz));const sw=Math.sin(t*9+o.ph)*.6;o.legs[0].rotation.x=sw;o.legs[1].rotation.x=-sw})});
-  /* ----- 야외 농구장 (운동장 위쪽 옆) ----- */
-  const BX=24,BZ=-7.6,BLn=14,BWd=7.6;
+  /* ----- 야외 농구장 (축구장 왼쪽 바로 옆, 시작하면 오른쪽 앞에 보여요) ----- */
+  const BX=9.3,BZ=10.5,BLn=14,BWd=7.4;
   const bcT=ctex(700,380,(x,w,h)=>{x.fillStyle='#3d6f9e';x.fillRect(0,0,w,h);x.fillStyle='#4a82b5';x.fillRect(16,16,w-32,h-32);grain(x,w,h,10);
     x.fillStyle='#c85a3a';[[16,w*.2],[w-16-w*.2,w*.2]].forEach(([kx,kw])=>x.fillRect(kx,h*.32,kw,h*.36));
     x.strokeStyle='#fff';x.lineWidth=5;x.strokeRect(16,16,w-32,h-32);x.beginPath();x.moveTo(w/2,16);x.lineTo(w/2,h-16);x.stroke();x.beginPath();x.arc(w/2,h/2,46,0,7);x.stroke();
     [[16,1],[w-16,-1]].forEach(([bx,d])=>{x.strokeRect(Math.min(bx,bx+d*w*.2),h*.32,w*.2,h*.36);x.beginPath();x.arc(bx+d*w*.2,h/2,h*.18,0,7);x.stroke();
       x.beginPath();x.moveTo(bx,h*.08);x.lineTo(bx+d*w*.1,h*.08);x.arc(bx+d*w*.05,h/2,h*.42,d>0?-Math.PI/2.4:Math.PI+Math.PI/2.4,d>0?Math.PI/2.4:Math.PI-Math.PI/2.4,d<0);x.lineTo(bx,h*.92);x.stroke()})});
-  const bcourt=new T.Mesh(new T.PlaneGeometry(BLn,BWd),new T.MeshStandardMaterial({map:bcT,roughness:.85}));bcourt.rotation.x=-Math.PI/2;bcourt.position.set(BX,.018,BZ);g.add(bcourt);
-  const fenceM=new T.MeshBasicMaterial({color:0x6f7782,transparent:true,opacity:.35,side:T.DoubleSide});
-  const fz=new T.Mesh(new T.PlaneGeometry(BLn+1,2.4),fenceM);fz.position.set(BX,1.2,BZ-BWd/2-.6);g.add(fz);
+  const bcourt=new T.Mesh(new T.PlaneGeometry(BLn,BWd),new T.MeshStandardMaterial({map:bcT,roughness:.85}));bcourt.rotation.set(-Math.PI/2,0,Math.PI/2);bcourt.position.set(BX,.018,BZ);g.add(bcourt);
   const poleBM=M(0x3a3f48,{r:.5,m:.5}),rimM=M(0xf07c2a,{r:.4,m:.4}),bbM=new T.MeshStandardMaterial({color:0xf2f6fa,roughness:.4,transparent:true,opacity:.92});
   const hoopsB=[];
-  [-1,1].forEach(d=>{const hx=BX+d*(BLn/2-1.2);
-    box(.16,3.2,.16,poleBM,BX+d*(BLn/2+.25),1.6,BZ);box(1.35,.1,.1,poleBM,BX+d*(BLn/2-.4),3.15,BZ);
-    const bb=new T.Mesh(new T.BoxGeometry(.06,1.05,1.8),bbM);bb.position.set(BX+d*(BLn/2-.75),3.4,BZ);g.add(bb);
-    const sq=new T.Mesh(new T.PlaneGeometry(.6,.45),new T.MeshBasicMaterial({color:0xd6453a,wireframe:true}));sq.position.set(BX+d*(BLn/2-.79),3.3,BZ);sq.rotation.y=-d*Math.PI/2;g.add(sq);
-    const rim=new T.Mesh(new T.TorusGeometry(.23,.022,6,24),rimM);rim.rotation.x=Math.PI/2;rim.position.set(hx,3.05,BZ);g.add(rim);
-    const netB=new T.Mesh(new T.CylinderGeometry(.23,.14,.42,12,2,true),new T.MeshBasicMaterial({color:0xffffff,wireframe:true,transparent:true,opacity:.7}));netB.position.set(hx,2.83,BZ);g.add(netB);
-    hoopsB.push({hx,bb,rim,netB})});
-  // 공 바구니와 벤치
-  box(.9,.5,.5,M(0x2f2924),BX-2,.25,BZ+BWd/2+.7);for(let i=0;i<5;i++){const b=new T.Mesh(new T.SphereGeometry(.12,10,8),M(0xd8682a));b.position.set(BX-2.3+i*.15,.58,BZ+BWd/2+.7+(i%2)*.1-.05);g.add(b)}
-  box(2.4,.08,.45,M(0xa0703f),BX+2.5,.45,BZ+BWd/2+.8);
-  // 혼자 슛 연습하는 학생
+  [-1,1].forEach(d=>{const hz=BZ+d*(BLn/2-1.2);
+    box(.16,3.2,.16,poleBM,BX,1.6,BZ+d*(BLn/2+.25));box(.1,.1,1.35,poleBM,BX,3.15,BZ+d*(BLn/2-.4));
+    const bb=new T.Mesh(new T.BoxGeometry(1.8,1.05,.06),bbM);bb.position.set(BX,3.4,BZ+d*(BLn/2-.75));g.add(bb);
+    const sq=new T.Mesh(new T.PlaneGeometry(.6,.45),new T.MeshBasicMaterial({color:0xd6453a,wireframe:true}));sq.position.set(BX,3.3,BZ+d*(BLn/2-.79));sq.rotation.y=d<0?0:Math.PI;g.add(sq);
+    const rim=new T.Mesh(new T.TorusGeometry(.23,.022,6,24),rimM);rim.rotation.x=Math.PI/2;rim.position.set(BX,3.05,hz);g.add(rim);
+    const netB=new T.Mesh(new T.CylinderGeometry(.23,.14,.42,12,2,true),new T.MeshBasicMaterial({color:0xffffff,wireframe:true,transparent:true,opacity:.7}));netB.position.set(BX,2.83,hz);g.add(netB);
+    hoopsB.push({hz,bb,rim,netB})});
+  // 공 바구니
+  box(.5,.5,.9,M(0x2f2924),BX+BWd/2+.6,.25,BZ+2);for(let i=0;i<5;i++){const bl=new T.Mesh(new T.SphereGeometry(.12,10,8),M(0xd8682a));bl.position.set(BX+BWd/2+.6+(i%2)*.1-.05,.58,BZ+1.7+i*.15);g.add(bl)}
+  // 혼자 슛 연습하는 학생 (안쪽 골대)
   {const sh=new T.Group();const bd=new T.Mesh(new T.CylinderGeometry(.18,.2,.7,8),M(0xf07c2a));bd.position.y=1.0;sh.add(bd);const hd=new T.Mesh(new T.SphereGeometry(.17,10,8),M(0xf0c9a2));hd.position.y=1.55;sh.add(hd);
    const lg=new T.Mesh(new T.CylinderGeometry(.19,.19,.62,8),M(0x22303f));lg.position.y=.33;sh.add(lg);const sb=new T.Mesh(new T.SphereGeometry(.12,10,8),M(0xd8682a));g.add(sb);
-   const hp=hoopsB[0],sx=hp.hx+3.2;sh.position.set(sx,0,BZ+.4);sh.rotation.y=Math.PI/2;g.add(sh);
-   ANIMS.push((dt,t)=>{const c=t%3.2;if(c<1.6){const k=Math.abs(Math.sin(c*6));sb.position.set(sx-.35,.12+k*.75,BZ+.4);sh.position.y=0}
-     else{const u=Math.min(1,(c-1.6)/.9);sh.position.y=u<.25?Math.sin(u/.25*Math.PI)*.15:0;const x=lerp3(sx-.3,hp.hx,u),y=lerp3(1.8,3.15,u)+Math.sin(u*Math.PI)*1.3;sb.position.set(x,u<1?y:Math.max(.12,3.1-(c-2.5)*6),BZ+(u<1?.4*(1-u):0))}})}
-  // 간판
+   const hp=hoopsB[1],sz=hp.hz-3.2,sx=BX+1.4;sh.position.set(sx,0,sz);sh.rotation.y=Math.atan2(-(BX-sx),-(hp.hz-sz))+Math.PI;g.add(sh);
+   ANIMS.push((dt,t)=>{const c=t%3.2;if(c<1.6){const k=Math.abs(Math.sin(c*6));sb.position.set(sx,.12+k*.75,sz+.35);sh.position.y=0}
+     else{const u=Math.min(1,(c-1.6)/.9);sh.position.y=u<.25?Math.sin(u/.25*Math.PI)*.15:0;const y=lerp3(1.8,3.15,u)+Math.sin(u*Math.PI)*1.3;
+       sb.position.set(lerp3(sx,BX,u),u<1?y:Math.max(.12,3.1-(c-2.5)*6),lerp3(sz+.3,hp.hz,u))}})}
+  // 간판 (시작 지점에서 보이게, 앞쪽을 향함)
   const ftSignT=ctex(512,300,(x,w,h)=>{x.fillStyle='#2b1d14';x.fillRect(0,0,w,h);x.fillStyle='#f07c2a';x.fillRect(0,0,w,18);x.fillStyle='#fff';x.textAlign='center';
     x.font=`96px ${EMO}`;x.fillText('🏀',w*.18,150);x.font=`80px ${DISP}`;x.fillText('자유투',w*.6,138);x.fillStyle='#ffd23f';x.font=`34px ${BODY}`;x.fillText('자유투 라인에 서면 시작!',w/2,230)});
-  const ftSign=new T.Mesh(new T.PlaneGeometry(2.1,1.23),new T.MeshStandardMaterial({map:ftSignT,roughness:.7}));ftSign.position.set(BX+3.6,1.75,BZ+BWd/2+1.3);ftSign.rotation.y=-.35;g.add(ftSign);
-  {const ry=ftSign.rotation.y,lx=Math.cos(ry),lz=-Math.sin(ry),legM=M(0x2f2924,{r:.5,m:.4});[-1,1].forEach(k=>box(.08,1.2,.08,legM,BX+3.6+k*.9*lx,.6,BZ+BWd/2+1.3+k*.9*lz-.02))}
-  const ftPiv=new T.Group();g.add(ftPiv);const hpE=hoopsB[1];
-  doors.push({id:'freethrow',r:H.rooms.freethrow||{title:'자유투'},floor:OUT,pivot:ftPiv,open:0,target:0,front:{x:hpE.hx-4.2,z:BZ},look:{x:hpE.hx,z:BZ},hits:[ftSign,hpE.bb,hpE.rim,hpE.netB],badgePos:{x:hpE.hx-.3,y:4.3,z:BZ}});
+  const ftSign=new T.Mesh(new T.PlaneGeometry(2.1,1.23),new T.MeshStandardMaterial({map:ftSignT,roughness:.7}));ftSign.position.set(BX-BWd/2-.5,1.95,BZ+BLn/2-1.5);ftSign.rotation.y=-.45;g.add(ftSign);
+  {const ry=ftSign.rotation.y,lx=Math.cos(ry),lz=-Math.sin(ry),legM=M(0x2f2924,{r:.5,m:.4});[-1,1].forEach(k=>box(.08,1.4,.08,legM,ftSign.position.x+k*.9*lx,.7,ftSign.position.z+k*.9*lz-.02))}
+  const ftPiv=new T.Group();g.add(ftPiv);const hpE=hoopsB[0];
+  doors.push({id:'freethrow',r:H.rooms.freethrow||{title:'자유투'},floor:OUT,pivot:ftPiv,open:0,target:0,front:{x:BX,z:hpE.hz+4.2},look:{x:BX,z:hpE.hz},hits:[ftSign,hpE.bb,hpE.rim,hpE.netB,bcourt],badgePos:{x:BX,y:4.3,z:hpE.hz+.3}});
+  // 시작 지점 안내 표지판
+  {const postM=M(0x5a3a24,{r:.7});const sx0=1.5,sz0=13;box(.14,2.9,.14,postM,sx0,1.45,sz0);
+   const arrow=(txt,col,y,dir)=>{const tx=ctex(512,128,(x,w,h)=>{x.fillStyle=col;x.beginPath();if(dir>0){x.moveTo(0,0);x.lineTo(w-56,0);x.lineTo(w,h/2);x.lineTo(w-56,h);x.lineTo(0,h)}else{x.moveTo(56,0);x.lineTo(w,0);x.lineTo(w,h);x.lineTo(56,h);x.lineTo(0,h/2)}x.closePath();x.fill();
+       x.fillStyle='#fff';x.font=`60px ${DISP}`;x.textAlign='center';x.textBaseline='middle';x.fillText(txt,w/2+(dir>0?-20:20),h/2+4)});
+     const m=new T.Mesh(new T.PlaneGeometry(2.3,.58),new T.MeshStandardMaterial({map:tx,side:T.DoubleSide,roughness:.7}));m.position.set(sx0+.6,y,sz0+.08);m.rotation.y=-.12;g.add(m);return m};
+   arrow("🏀 자유투 →","#d8682a",2.6,1);arrow("⚽ 승부차기 →","#2f8a4a",1.92,1);
+   const top=ctex(256,128,(x,w,h)=>{x.fillStyle='#fffaf0';x.fillRect(0,0,w,h);x.fillStyle='#2a2018';x.font=`44px ${DISP}`;x.textAlign='center';x.textBaseline='middle';x.fillText('운동장',w/2,h/2+3)});
+   const tm=new T.Mesh(new T.PlaneGeometry(1,.5),new T.MeshStandardMaterial({map:top,side:T.DoubleSide}));tm.position.set(sx0,3.05,sz0+.08);tm.rotation.y=-.12;g.add(tm)}
   /* ----- 승부차기 구역 (운동장 오른쪽 옆) ----- */
   const PKX=41,PKZ=12;
   const pkT=ctex(256,448,(x,w,h)=>{for(let i=0;i<8;i++){x.fillStyle=i%2?'#5f9e45':'#6cab50';x.fillRect(0,i*h/8,w,h/8)}grain(x,w,h,8);
