@@ -281,6 +281,19 @@ function groundY(x,z){ // 현관 단과 돌계단 높이
     x.font=`96px ${EMO}`;x.fillText('⚽',w*.18,150);x.font=`76px ${DISP}`;x.fillText('승부차기',w*.6,138);x.fillStyle='#ffd23f';x.font=`34px ${BODY}`;x.fillText('공 앞에 서면 시작!',w/2,230)});
   const pkSign=new T.Mesh(new T.PlaneGeometry(2.1,1.23),new T.MeshStandardMaterial({map:pkSignT,roughness:.7}));pkSign.position.set(PKX-4.3,1.75,PKZ+3.2);pkSign.rotation.y=-Math.PI/2+.5;g.add(pkSign);
   {const ry=pkSign.rotation.y,lx=Math.cos(ry),lz=-Math.sin(ry),legM=M(0x2f2924,{r:.5,m:.4});[-1,1].forEach(k=>box(.08,1.2,.08,legM,PKX-4.3+k*.9*lx,.6,PKZ+3.2+k*.9*lz-.02))}
+  // 응원 관중석 (오른쪽)
+  {const bM=M(0xb9b2a4),seatM=[M(0xe8423a),M(0xffffff)];const fans=[];
+   for(let r=0;r<3;r++){box(1.2,.45+r*.45,10,bM,PKX+5.3+r*1.1,(.45+r*.45)/2,PKZ-1.5);box(1.15,.06,10,seatM[r%2],PKX+5.3+r*1.1,.48+r*.45,PKZ-1.5);
+     for(let i=0;i<6;i++){const f=new T.Group();const red=(i+r)%3!==2;const bd=new T.Mesh(new T.CylinderGeometry(.17,.19,.55,8),M(red?0xe8423a:0xffffff));bd.position.y=.3;f.add(bd);
+       const hd=new T.Mesh(new T.SphereGeometry(.15,10,8),M([0xf1c9a5,0xe8b98f,0xd9a47c][(i+r)%3]));hd.position.y=.72;f.add(hd);
+       const arms=[-1,1].map(sd=>{const ag=new T.Group();ag.position.set(0,.5,sd*.2);const am=new T.Mesh(new T.CylinderGeometry(.045,.045,.4,6),M(red?0xe8423a:0xffffff));am.position.y=.2;ag.add(am);f.add(ag);return ag});
+       let flag=null;if((i*7+r*3)%5===0){flag=new T.Group();const pole=new T.Mesh(new T.CylinderGeometry(.015,.015,.9,4),M(0xdddddd));pole.position.y=.45;flag.add(pole);
+         const cl=new T.Mesh(new T.PlaneGeometry(.5,.32),new T.MeshStandardMaterial({color:(i+r)%2?0xe8423a:0xffffff,side:T.DoubleSide}));cl.position.set(0,.78,.25);cl.rotation.y=Math.PI/2;flag.add(cl);flag.position.set(0,.55,.22);f.add(flag)}
+       const baseY=.5+r*.45;f.position.set(PKX+5.2+r*1.1,baseY,PKZ-5.5+i*1.6+(r%2)*.4);f.rotation.y=-Math.PI/2;g.add(f);fans.push({f,arms,flag,baseY,ph:Math.random()*7})}}
+   const banT=ctex(512,96,(x,w,h)=>{x.fillStyle='#e8423a';x.fillRect(0,0,w,h);x.fillStyle='#fff';x.font=`64px ${DISP}`;x.textAlign='center';x.fillText('대~한민국 할 수 있다!',w/2,72)});
+   const ban=new T.Mesh(new T.PlaneGeometry(6,1.1),new T.MeshStandardMaterial({map:banT,side:T.DoubleSide}));ban.position.set(PKX+4.6,.6,PKZ-1.5);ban.rotation.y=-Math.PI/2;g.add(ban);
+   ANIMS.push((dt,t)=>{const wave=(Math.sin(t*.7)+1)/2;fans.forEach(o=>{const k=Math.max(0,Math.sin(t*.9-o.f.position.z*.35));const hop=k>.7?Math.abs(Math.sin(t*9+o.ph))*.18:0;o.f.position.y=o.baseY+hop;
+     o.arms.forEach((a,i)=>{a.rotation.x=(i?1:-1)*(k>.5?2.6+Math.sin(t*10+o.ph)*.3:.3+Math.sin(t*2+o.ph)*.1)});if(o.flag)o.flag.rotation.x=Math.sin(t*4+o.ph)*.5})})}
   const pkPiv=new T.Group();g.add(pkPiv);
   doors.push({id:'penalty',r:H.rooms.penalty||{title:'승부차기'},floor:OUT,pivot:pkPiv,open:0,target:0,front:{x:PKX,z:PKZ-1.5},look:{x:PKX,z:gzP},hits:[pkSign,pkBall,kb,kh,pkNet],badgePos:{x:PKX,y:2.8,z:gzP+.3}});
   /* ----- eco garden (왼쪽) ----- */
