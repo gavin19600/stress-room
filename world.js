@@ -371,13 +371,13 @@ function groundY(x,z){ // 현관 단과 돌계단 높이
   const board=new T.Mesh(new T.PlaneGeometry(1.3,.98),new T.MeshStandardMaterial({map:boardT,roughness:.8}));board.position.set(-2.4,1.35,15);board.rotation.y=.35;g.add(board);
   const poleM=M(0x2f2924,{r:.5,m:.4}),bulbM=new T.MeshBasicMaterial({color:0xfff2cc});
   [[-2.4,9],[2.4,9],[-2.4,18],[2.4,18],[-2.4,26],[2.4,26]].forEach(([x,z])=>{const p=new T.Mesh(new T.CylinderGeometry(.06,.08,3.2,8),poleM);p.position.set(x,1.6,z);g.add(p);const b=new T.Mesh(new T.SphereGeometry(.2,12,10),bulbM);b.position.set(x,3.3,z);g.add(b)});
-  const benchM=M(0xa0703f,{r:.6});[[-4.5,12,1],[4.5,12,-1],[-4.5,21,1],[4.5,21,-1]].forEach(([x,z,s])=>{box(.5,.08,1.6,benchM,x,.45,z);box(.06,.45,1.6,benchM,x-s*.25,.72,z);[-.65,.65].forEach(o=>box(.45,.45,.06,poleM,x,.225,z+o))});
+  const benchM=M(0xa0703f,{r:.6});[[-4.5,12,1],[4.5,16.6,-1],[-4.5,21,1],[4.5,21,-1]].forEach(([x,z,s])=>{box(.5,.08,1.6,benchM,x,.45,z);box(.06,.45,1.6,benchM,x-s*.25,.72,z);[-.65,.65].forEach(o=>box(.45,.45,.06,poleM,x,.225,z+o))});
   /* ----- light ----- */
   const sun=new T.DirectionalLight(0xfff4e0,1.0);sun.position.set(-20,40,30);g.add(sun);g.add(new T.AmbientLight(0xdfefff,.3));
   floors.push({g,elevHits:[],walk:[ground,plaza,path,field],name:'스트레스 마음정비소 앞',no:'밖',xb:34,zMin:FZ+.9,zMax:30,outside:true,
     clamp(P){P.x=Math.max(-38,Math.min(44.5,P.x));P.z=Math.min(30,P.z);const minZ=Math.abs(P.x)<13.6?FZ+.9:-12;if(P.z<minZ)P.z=minZ}});
   /* ----- 서당 순간이동 문 (표지판 옆) ----- */
-  {const PX=-7.7,PZ=5.5,RY=.28,url='https://abit.ly/'+encodeURIComponent('온라인서당');
+  {const PX=4.15,PZ=9.4,RY=-.2,url='https://abit.ly/'+encodeURIComponent('온라인서당');
    const pg=new T.Group();pg.position.set(PX,0,PZ);pg.rotation.y=RY;g.add(pg);
    const red=M(0xb5332b,{r:.6}),grn=M(0x2f7d5b,{r:.6}),roofM=M(0x2b2d33,{r:.7}),stoneM=M(0xb9b2a4,{r:.9});
    [-1,1].forEach(k=>{const b=new T.Mesh(new T.BoxGeometry(.5,.3,.5),stoneM);b.position.set(k*1.05,.15,0);pg.add(b);
