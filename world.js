@@ -376,6 +376,30 @@ function groundY(x,z){ // 현관 단과 돌계단 높이
   const sun=new T.DirectionalLight(0xfff4e0,1.0);sun.position.set(-20,40,30);g.add(sun);g.add(new T.AmbientLight(0xdfefff,.3));
   floors.push({g,elevHits:[],walk:[ground,plaza,path,field],name:'스트레스 마음정비소 앞',no:'밖',xb:34,zMin:FZ+.9,zMax:30,outside:true,
     clamp(P){P.x=Math.max(-38,Math.min(44.5,P.x));P.z=Math.min(30,P.z);const minZ=Math.abs(P.x)<13.6?FZ+.9:-12;if(P.z<minZ)P.z=minZ}});
+  /* ----- 서당 순간이동 문 (표지판 옆) ----- */
+  {const PX=-7.7,PZ=5.5,RY=.28,url='https://abit.ly/'+encodeURIComponent('온라인서당');
+   const pg=new T.Group();pg.position.set(PX,0,PZ);pg.rotation.y=RY;g.add(pg);
+   const red=M(0xb5332b,{r:.6}),grn=M(0x2f7d5b,{r:.6}),roofM=M(0x2b2d33,{r:.7}),stoneM=M(0xb9b2a4,{r:.9});
+   [-1,1].forEach(k=>{const b=new T.Mesh(new T.BoxGeometry(.5,.3,.5),stoneM);b.position.set(k*1.05,.15,0);pg.add(b);
+     const c=new T.Mesh(new T.CylinderGeometry(.16,.18,2.9,12),red);c.position.set(k*1.05,1.75,0);pg.add(c)});
+   const lin=new T.Mesh(new T.BoxGeometry(2.7,.32,.34),grn);lin.position.set(0,3.25,0);pg.add(lin);
+   const lin2=new T.Mesh(new T.BoxGeometry(2.5,.12,.3),red);lin2.position.set(0,3.02,0);pg.add(lin2);
+   const roof=new T.Mesh(new T.CylinderGeometry(.01,1.95,.6,4,1),roofM);roof.rotation.y=Math.PI/4;roof.scale.set(1,1,.42);roof.position.set(0,3.7,0);pg.add(roof);
+   const ttl=ctex(512,128,(x,w,h)=>{x.fillStyle='#2b2d33';x.fillRect(0,0,w,h);x.strokeStyle='#d8b25a';x.lineWidth=6;x.strokeRect(6,6,w-12,h-12);x.fillStyle='#f5d27a';x.font=`60px ${DISP}`;x.textAlign='center';x.textBaseline='middle';x.fillText('서당 순간이동문',w/2,h/2+4)});
+   const tm=new T.Mesh(new T.PlaneGeometry(1.9,.48),new T.MeshBasicMaterial({map:ttl}));tm.position.set(0,3.25,.18);pg.add(tm);
+   const swT=ctex(256,256,(x,w,h)=>{const gr=x.createRadialGradient(w/2,h/2,4,w/2,h/2,w/2);gr.addColorStop(0,'#fffbe8');gr.addColorStop(.25,'#ffd36a');gr.addColorStop(.6,'#9b5de5');gr.addColorStop(1,'#2a1a5e');x.fillStyle=gr;x.fillRect(0,0,w,h);
+     x.strokeStyle='rgba(255,255,255,.55)';x.lineWidth=5;for(let a=0;a<3;a++){x.beginPath();for(let t=0;t<1;t+=.01){const r=t*w*.48,an=t*9+a*2.09;x.lineTo(w/2+Math.cos(an)*r,h/2+Math.sin(an)*r)}x.stroke()}});
+   const swM=new T.MeshBasicMaterial({map:swT,transparent:true,opacity:.92,side:T.DoubleSide,depthWrite:false});
+   const sw=new T.Mesh(new T.CircleGeometry(1,48),swM);sw.scale.set(.86,1.35,1);sw.position.set(0,1.62,0);pg.add(sw);
+   const sw2=new T.Mesh(new T.CircleGeometry(1,48),new T.MeshBasicMaterial({map:swT,transparent:true,opacity:.45,side:T.DoubleSide,depthWrite:false,blending:T.AdditiveBlending}));sw2.scale.set(.95,1.45,1);sw2.position.set(0,1.62,.02);pg.add(sw2);
+   const lightP=new T.PointLight(0xc89bff,1.2,7,1.6);lightP.position.set(0,1.6,.6);pg.add(lightP);
+   const sparkM=new T.MeshBasicMaterial({color:0xfff0b0,transparent:true,depthWrite:false});const sparks=[];
+   for(let i=0;i<18;i++){const sp=new T.Mesh(new T.SphereGeometry(.035,6,4),sparkM);pg.add(sp);sparks.push({sp,a:Math.random()*7,r:.4+Math.random()*.5,y:Math.random()*2.8,v:.4+Math.random()*.6})}
+   ANIMS.push((dt,t)=>{sw.rotation.z-=dt*1.6;sw2.rotation.z+=dt*.9;const pu=1+Math.sin(t*3)*.04;sw.scale.set(.86*pu,1.35*pu,1);lightP.intensity=1+Math.sin(t*4)*.35;
+     sparks.forEach(o=>{o.y+=o.v*dt;if(o.y>3)o.y=.1;o.a+=dt*1.5;o.sp.position.set(Math.cos(o.a)*o.r,o.y,Math.sin(o.a)*.15+.1)})});
+   const piv=new T.Group();g.add(piv);
+   const fx=PX+Math.sin(RY)*1.4,fz=PZ+Math.cos(RY)*1.4;
+   doors.push({id:'__portal',link:url,portal:true,center:{x:PX,z:PZ},r:{title:'서당 순간이동문'},floor:OUT,pivot:piv,open:0,target:0,front:{x:fx,z:fz},look:{x:PX,z:PZ},hits:[sw,sw2,lin,tm]})}
   /* ----- 입구 옆: 한문 김선생 온라인 서당 표지판 (누르면 링크로) ----- */
   {const SX=-4.5,SZ=4.6,url='https://abit.ly/'+encodeURIComponent('온라인서당');
    const sdT=ctex(640,380,(x,w,h)=>{x.fillStyle='#3a2414';x.fillRect(0,0,w,h);x.fillStyle='#f5ead2';x.fillRect(14,14,w-28,h-28);
@@ -416,7 +440,12 @@ function goFloor(fi){if(fi===P.floor||busy)return;busy=true;auto=null;const t=H.
 function placeStart(fi){if(fi===OUT){P.x=0;P.z=20}else{P.x=0;P.z=floors[fi].z0-1}P.yaw=0;P.face=0;P.pitch=-.04}
 document.querySelectorAll('[data-fl]').forEach(b=>b.onclick=()=>{const n=+b.dataset.fl;goFloor(n===0?OUT:n-1)});
 const yawTo=(x,z)=>Math.atan2(-(x-P.x),-(z-P.z));
-function openLink(d){H.ui('btn');try{window.open(d.link,'_blank','noopener')}catch(e){location.href=d.link}}
+function teleport(d){if(busy)return;busy=true;auto=null;enterBtn.hidden=true;const t=H.now();H.tone(220,t,1.0,.14,'sine',{to:1760,glide:.9,wet:true});H.noise(t,1.0,'bandpass',900,.6,.3,{atk:.4,wet:true});H.tone(1320,t+.75,.6,.1,'triangle',{wet:true});H.buzz([20,40,20,40,80]);
+  fadeEl.style.transition='opacity .8s';fadeEl.style.background='radial-gradient(circle,#fffbe8,#9b5de5 60%,#2a1a5e)';fadeEl.style.opacity=1;
+  setTimeout(()=>{location.href=d.link},900);setTimeout(resetTp,4000)}
+function resetTp(){busy=false;fadeEl.style.opacity=0;fadeEl.style.background='';setTimeout(()=>{fadeEl.style.transition=''},900)}
+addEventListener('pageshow',e=>{if(e.persisted){resetTp();const pd=doors.find(x=>x.portal);if(pd&&Math.hypot(P.x-pd.center.x,P.z-pd.center.z)<1.2){P.x=pd.front.x;P.z=pd.front.z+.6}}});
+function openLink(d){if(d.portal){teleport(d);return}H.ui('btn');try{window.open(d.link,'_blank','noopener')}catch(e){location.href=d.link}}
 function openDoor(d){if(d.link){auto=null;openLink(d);return}if(busy)return;busy=true;auto=null;enterBtn.hidden=true;d.target=1;
   if(d.enter){const t=H.now();H.noise(t,.7,'bandpass',900,.6,.3,{atk:.1});H.tone(659,t+.15,.5,.1,'sine',{wet:true});H.tone(988,t+.4,.7,.1,'sine',{wet:true});H.buzz([30,50,30]);
     setTimeout(()=>fade(()=>{busy=false;d.target=0;d.open=0;setFloor(0);placeStart(0);const tt=H.now();H.tone(523,tt,.4,.08,'sine',{wet:true});H.tone(784,tt+.12,.6,.08,'sine',{wet:true})}),900);return}
@@ -486,6 +515,7 @@ function frame(n){raf=requestAnimationFrame(frame);const dt=Math.min(.05,last?(n
     if(nz>.3)P.yaw=angLerp(P.yaw,P.face,Math.min(1,dt*.8));if(!moved){moved=true;helpEl.classList.add('gone')}}
   if(fl.clamp)fl.clamp(P);else{P.x=Math.max(-fl.xb,Math.min(fl.xb,P.x));P.z=Math.max(fl.zMin,Math.min(fl.zMax,P.z))}
   {const gy=fl.outside?groundY(P.x,P.z):0;P.gy=(P.gy||0)+(gy-(P.gy||0))*Math.min(1,dt*12)}
+  if(fl.outside&&!busy){const pd=doors.find(x=>x.portal);if(pd&&Math.hypot(P.x-pd.center.x,P.z-pd.center.z)<.55&&speed>.3)teleport(pd)}
   if(P.air){P.vy-=12*dt;P.jy+=P.vy*dt;if(P.jy<=0){P.jy=0;P.vy=0;P.air=false;land()}}
   if(fl.outside)ANIMS.forEach(f=>f(dt,n/1000));
   if(fl.outside&&Math.random()<dt*.3){const t=H.now(),f=2600+Math.random()*1600;H.tone(f,t,.05,.04,'sine',{to:f*1.35,glide:.05});H.tone(f*1.1,t+.11,.05,.035,'sine',{to:f*1.5,glide:.05})}
@@ -496,7 +526,7 @@ function frame(n){raf=requestAnimationFrame(frame);const dt=Math.min(.05,last?(n
    if(!fl.outside){cx=Math.max(-CW/2+.15,Math.min(CW/2-.15,cx));cz=Math.max(fl.z1+.15,Math.min(fl.z0-.15,cz));cy=Math.min(CH-.15,cy)}else{if(Math.abs(cx)<14.5)cz=Math.max(-1.6,cz);else cz=Math.max(-12.5,cz)}
    cam.position.set(cx,cy,cz);cam.position.y+=P.jy*.35;cam.lookAt(P.x,1.25+(P.gy||0)+P.jy*.5,P.z)}
   doors.forEach(d=>{if(d.floor!==P.floor)return;d.open+=(d.target-d.open)*Math.min(1,dt*(d.enter?4:7));if(d.enter){d.pivL.rotation.y=d.open*1.45;d.pivR.rotation.y=-d.open*1.45}else d.pivot.rotation.y=d.open*1.35});
-  const nd=busy?null:nearest();if(nd){enterBtn.hidden=false;const html=nd.link?'📜 <span>온라인 서당</span> 놀러가기':'🚪 <span></span> 들어가기';if(enterBtn._mode!==html){enterBtn._mode=html;enterBtn.innerHTML=html}if(!nd.link)enterBtn.querySelector('span').textContent=nd.r.title}else enterBtn.hidden=true;
+  const nd=busy?null:nearest();if(nd){enterBtn.hidden=false;const html=nd.portal?'🌀 <span>서당으로</span> 순간이동':nd.link?'📜 <span>온라인 서당</span> 놀러가기':'🚪 <span></span> 들어가기';if(enterBtn._mode!==html){enterBtn._mode=html;enterBtn.innerHTML=html}if(!nd.link)enterBtn.querySelector('span').textContent=nd.r.title}else enterBtn.hidden=true;
   if(H.world&&H.world.tick)H.world.tick(dt,running);
   renderer.render(scene,cam)}
 
