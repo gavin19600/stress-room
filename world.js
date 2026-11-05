@@ -417,6 +417,15 @@ function groundY(x,z){ // 현관 단과 돌계단 높이
    ANIMS.push((dt,t)=>{glowM.opacity=.18+.14*Math.sin(t*3)});
    doors.push({id:'__seodang',link:url,r:{title:'한문 김선생의 온라인 서당'},floor:OUT,pivot:new T.Group(),open:0,target:0,front:{x:SX+.6,z:SZ+1.7},look:{x:SX,z:SZ},hits:[sd,back]})}
   doors.push({id:'__enter',enter:true,r:{title:'스트레스 마음정비소'},floor:OUT,pivL,pivR,open:0,target:0,front:{x:0,z:FZ+1.6},look:{x:0,z:FZ-1},hits:[L,R,back,fan,arch,fascia]});
+  /* 입구 앞 바닥: 화살표 + 입장 */
+  {const ar=ctex(512,640,(x,w,h)=>{x.clearRect(0,0,w,h);
+     x.fillStyle='#e2452f';x.strokeStyle='#fff';x.lineWidth=16;x.lineJoin='round';
+     x.beginPath();x.moveTo(w/2,30);x.lineTo(w-60,250);x.lineTo(w/2+80,250);x.lineTo(w/2+80,420);x.lineTo(w/2-80,420);x.lineTo(w/2-80,250);x.lineTo(60,250);x.closePath();x.fill();x.stroke();
+     x.fillStyle='#e2452f';x.font=`170px ${DISP}`;x.textAlign='center';x.textBaseline='middle';x.lineWidth=18;x.strokeStyle='#fff';x.strokeText('입장',w/2,545);x.fillText('입장',w/2,545)});
+   const arM=new T.MeshBasicMaterial({map:ar,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2});
+   const arrow=new T.Mesh(new T.PlaneGeometry(2.9,3.6),arM);arrow.rotation.x=-Math.PI/2;arrow.position.set(0,.03,FZ+7.6);g.add(arrow);
+   ANIMS.push((dt,t)=>{arM.opacity=.85+.15*Math.sin(t*3);arrow.position.z=FZ+7.6-((t*.6)%1)*.25});
+   const ed=doors.find(d=>d.id==='__enter');if(ed)ed.hits.push(arrow)}
 })();
 
 scene.add(new T.HemisphereLight(0xfff3e0,0x3a2c22,.55));scene.add(new T.AmbientLight(0xffffff,.18));
