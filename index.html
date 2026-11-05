@@ -132,9 +132,9 @@ textarea.field{resize:none;line-height:1.5}
 .rpeople{flex:none;padding:6px 10px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:12px;color:#7ee0a8;white-space:nowrap}
 
 /* ---------- channel badge ---------- */
-.chan{position:absolute;z-index:7;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));height:28px;width:auto;border-radius:7px;
+.chan{object-fit:contain;flex:none;position:absolute;z-index:7;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));height:28px;width:auto;border-radius:7px;
   background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.3);pointer-events:none;user-select:none}
-.chan-hub{position:static;display:block;height:30px;margin-top:4px;box-shadow:none}
+.chan-hub{position:static;display:block;height:30px;width:auto;max-width:none;align-self:flex-start;flex:none;object-fit:contain;margin-top:4px;box-shadow:none}
 
 /* ---------- 3D world ---------- */
 #world{position:fixed;inset:0;background:#100d0b;z-index:4;overflow:hidden}
@@ -194,7 +194,7 @@ textarea.field{resize:none;line-height:1.5}
   </section>
 
   <div id="floors"></div>
-  <img class="chan chan-hub" src="img/channel.png" alt="한문 김선생 유튜브 채널">
+  <img class="chan chan-hub" src="img/channel.png?v=11051050" alt="한문 김선생 유튜브 채널">
   <p class="foot">소리와 진동이 나와요. 진동은 안드로이드 폰에서 작동하고, 아이폰은 화면 흔들림으로 대신해요. 때리고 깨는 대상은 사람 대신 상황이나 감정으로 정해 주세요.</p>
 </main>
 
@@ -233,7 +233,7 @@ textarea.field{resize:none;line-height:1.5}
     </div>
   </div>
   <div class="w-help" id="wHelp">왼쪽 조이스틱으로 걷고, 화면을 끌어서 둘러봐요. 바닥을 클릭(탭)하면 그곳으로 걸어가고, 문을 클릭하면 열어요. 마우스 휠로 확대·축소해요. 점프는 스페이스바, 달리기는 Shift(누르는 동안)나 R(켜고 끄기)이에요.</div>
-  <img class="chan" src="img/channel.png" alt="한문 김선생 유튜브 채널">
+  <img class="chan" src="img/channel.png?v=11051050" alt="한문 김선생 유튜브 채널">
   <div class="w-fade" id="wFade"></div>
 </section>
 
@@ -250,32 +250,32 @@ textarea.field{resize:none;line-height:1.5}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="js/fb-config.js?v=11050950"></script>
-<script src="js/fb-shim.js?v=11050950"></script>
-<script src="js/core.js?v=11050950"></script>
-<script src="rooms/sandbag.js?v=11050950"></script>
-<script src="rooms/plates.js?v=11050950"></script>
-<script src="rooms/shredder.js?v=11050950"></script>
-<script src="rooms/mole.js?v=11050950"></script>
-<script src="rooms/keycap.js?v=11050950"></script>
-<script src="rooms/bugs.js?v=11050950"></script>
-<script src="rooms/bubble.js?v=11050950"></script>
-<script src="rooms/breath.js?v=11050950"></script>
-<script src="rooms/sand.js?v=11050950"></script>
-<script src="rooms/kinetic.js?v=11050950"></script>
-<script src="rooms/pet.js?v=11050950"></script>
-<script src="rooms/recycle.js?v=11050950"></script>
-<script src="rooms/judo.js?v=11050950"></script>
-<script src="rooms/wakeup.js?v=11050950"></script>
-<script src="rooms/weather.js?v=11050950"></script>
-<script src="rooms/wall.js?v=11050950"></script>
-<script src="rooms/meditation.js?v=11050950"></script>
-<script src="rooms/counsel.js?v=11050950"></script>
-<script src="rooms/penalty.js?v=11050950"></script>
-<script src="rooms/freethrow.js?v=11050950"></script>
+<script src="js/fb-config.js?v=11051050"></script>
+<script src="js/fb-shim.js?v=11051050"></script>
+<script src="js/core.js?v=11051050"></script>
+<script src="rooms/sandbag.js?v=11051050"></script>
+<script src="rooms/plates.js?v=11051050"></script>
+<script src="rooms/shredder.js?v=11051050"></script>
+<script src="rooms/mole.js?v=11051050"></script>
+<script src="rooms/keycap.js?v=11051050"></script>
+<script src="rooms/bugs.js?v=11051050"></script>
+<script src="rooms/bubble.js?v=11051050"></script>
+<script src="rooms/breath.js?v=11051050"></script>
+<script src="rooms/sand.js?v=11051050"></script>
+<script src="rooms/kinetic.js?v=11051050"></script>
+<script src="rooms/pet.js?v=11051050"></script>
+<script src="rooms/recycle.js?v=11051050"></script>
+<script src="rooms/judo.js?v=11051050"></script>
+<script src="rooms/wakeup.js?v=11051050"></script>
+<script src="rooms/weather.js?v=11051050"></script>
+<script src="rooms/wall.js?v=11051050"></script>
+<script src="rooms/meditation.js?v=11051050"></script>
+<script src="rooms/counsel.js?v=11051050"></script>
+<script src="rooms/penalty.js?v=11051050"></script>
+<script src="rooms/freethrow.js?v=11051050"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="world.js?v=11050950"></script>
-<script src="multi.js?v=11050950"></script>
-<script src="js/init.js?v=11050950"></script>
+<script src="world.js?v=11051050"></script>
+<script src="multi.js?v=11051050"></script>
+<script src="js/init.js?v=11051050"></script>
 </body>
 </html>
