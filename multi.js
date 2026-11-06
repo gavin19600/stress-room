@@ -126,7 +126,7 @@ function refreshCounts(){const cnt={};others.forEach(o=>{if(o.rm)cnt[o.rm]=(cnt[
   const total=others.size+1;$('wCount').textContent=total;
   const rp=$('rPeople');if(H.lastRoom&&cnt[H.lastRoom]){rp.hidden=false;rp.textContent=`👥 친구 ${cnt[H.lastRoom]}명 같이 있어요`}else rp.hidden=true;
   if(!$('wPlist').hidden)buildList()}
-function where(o){if(o.rm)return ROOMNAME(o.rm)+' 방';if(o.fl===OUT)return'건물 밖';if(o.fl>=0&&o.fl<3)return`${o.fl+1}층 복도`;return'목록 보는 중'}
+function where(o){if(o.rm)return ROOMNAME(o.rm)+' 방';if(o.fl===OUT)return'건물 밖';if(o.fl>=0&&o.fl<OUT)return`${o.fl+1}층 ${o.fl===3?'전시관':'복도'}`;return'목록 보는 중'}
 function buildList(){const L=$('wPlist');const mine={nick:me?.nick||'나',col:me?.col||'#888',rm:H.lastRoom,fl:H.listMode?-1:P.floor};
   const rows=[[mine,true],...[...others.values()].map(o=>[o,false])];
   L.innerHTML=rows.map(([o,isMe])=>`<div><i style="background:${o.col}"></i><span>${H.esc(o.nick)}${isMe?' (나)':''}</span><small>${H.esc(where(o))}</small></div>`).join('')+

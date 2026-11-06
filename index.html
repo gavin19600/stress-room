@@ -5,11 +5,11 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://*.firebaseio.com https://*.firebasedatabase.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app; frame-src https://*.firebaseapp.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://cdnjs.cloudflare.com https://*.firebaseio.com https://*.firebasedatabase.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app; frame-src https://*.firebaseapp.com https://www.youtube-nocookie.com https://www.youtube.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
 <meta name="robots" content="noindex,nofollow">
 <title>스트레스 마음정비소</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Jua&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Jua&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;700&display=swap">
 <style>
 /* base reset (the Claude page skeleton used to supply this) */
 *,*::before,*::after{box-sizing:border-box}
@@ -131,6 +131,17 @@ textarea.field{resize:none;line-height:1.5}
 .swatch[aria-pressed="true"]{border-color:#fff}
 .rpeople{flex:none;padding:6px 10px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:12px;color:#7ee0a8;white-space:nowrap}
 
+/* ---------- 4F art modal ---------- */
+.art-modal{position:absolute;inset:0;z-index:30;background:rgba(10,8,14,.72);display:flex;align-items:center;justify-content:center;padding:16px}
+.art-modal[hidden]{display:none}
+.art-card{position:relative;width:min(440px,100%);max-height:100%;overflow:auto;background:#fffdf8;color:#2a2320;border-radius:16px;padding:16px 16px 18px;box-shadow:0 12px 40px rgba(0,0,0,.45)}
+.art-card img{display:block;width:100%;aspect-ratio:1;object-fit:contain;background:#f4f0e8;border:10px solid #c9a24a;border-radius:4px;box-sizing:border-box}
+.art-card h3{margin:12px 0 2px;font-family:var(--display);font-weight:400;font-size:22px}
+.art-card .by{margin:0 0 8px;color:#7a6f62;font-size:13px}
+.art-card .desc{margin:0 0 14px;font-size:14.5px;line-height:1.6;white-space:pre-wrap;background:#f6f1e7;border-radius:10px;padding:10px 12px}
+.art-card .btn{width:100%}
+.art-x{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:16px;cursor:pointer;z-index:1}
+.art-card .mosaic{display:inline-block;color:transparent;background:repeating-conic-gradient(#999 0 25%,#ccc 0 50%) 0 0/8px 8px}
 /* ---------- channel badge ---------- */
 .chan{object-fit:contain;flex:none;position:absolute;z-index:7;left:max(12px,env(safe-area-inset-left,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));height:28px;width:auto;border-radius:7px;
   background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.3);pointer-events:none;user-select:none}
@@ -202,7 +213,7 @@ textarea.field{resize:none;line-height:1.5}
   <div id="w3"></div>
   <div class="w-top">
     <div class="w-floor"><small>STRESS RELIEF</small><b id="wFloorNo">밖</b><span id="wFloorName">스트레스 마음정비소 앞</span></div>
-    <div class="w-elev" role="group" aria-label="엘리베이터"><button data-fl="3" aria-pressed="false">3F</button><button data-fl="2" aria-pressed="false">2F</button><button data-fl="1" aria-pressed="true">1F</button><button data-fl="0" aria-pressed="false" aria-label="건물 밖으로">밖</button></div>
+    <div class="w-elev" role="group" aria-label="엘리베이터"><button data-fl="4" aria-pressed="false">4F</button><button data-fl="3" aria-pressed="false">3F</button><button data-fl="2" aria-pressed="false">2F</button><button data-fl="1" aria-pressed="true">1F</button><button data-fl="0" aria-pressed="false" aria-label="건물 밖으로">밖</button></div>
     <div class="w-side"><button class="icon-btn" id="wMute" aria-label="소리 끄기">🔊</button><button class="icon-btn" id="wList" aria-label="목록으로 보기" title="목록으로 보기">☰</button></div>
   </div>
   <button class="w-enter" id="wEnter" hidden>🚪 <span></span> 들어가기</button>
@@ -250,32 +261,35 @@ textarea.field{resize:none;line-height:1.5}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script src="js/fb-config.js?v=11051050"></script>
-<script src="js/fb-shim.js?v=11051050"></script>
-<script src="js/core.js?v=11051050"></script>
-<script src="rooms/sandbag.js?v=11051050"></script>
-<script src="rooms/plates.js?v=11051050"></script>
-<script src="rooms/shredder.js?v=11051050"></script>
-<script src="rooms/mole.js?v=11051050"></script>
-<script src="rooms/keycap.js?v=11051050"></script>
-<script src="rooms/bugs.js?v=11051050"></script>
-<script src="rooms/bubble.js?v=11051050"></script>
-<script src="rooms/breath.js?v=11051050"></script>
-<script src="rooms/sand.js?v=11051050"></script>
-<script src="rooms/kinetic.js?v=11051050"></script>
-<script src="rooms/pet.js?v=11051050"></script>
-<script src="rooms/recycle.js?v=11051050"></script>
-<script src="rooms/judo.js?v=11051050"></script>
-<script src="rooms/wakeup.js?v=11051050"></script>
-<script src="rooms/weather.js?v=11051050"></script>
-<script src="rooms/wall.js?v=11051050"></script>
-<script src="rooms/meditation.js?v=11051050"></script>
-<script src="rooms/counsel.js?v=11051050"></script>
-<script src="rooms/penalty.js?v=11051050"></script>
-<script src="rooms/freethrow.js?v=11051050"></script>
+<script src="js/fb-config.js?v=11061503"></script>
+<script src="js/fb-shim.js?v=11061503"></script>
+<script src="js/core.js?v=11061503"></script>
+<script src="js/filter.js?v=11061503"></script>
+<script src="rooms/sandbag.js?v=11061503"></script>
+<script src="rooms/plates.js?v=11061503"></script>
+<script src="rooms/shredder.js?v=11061503"></script>
+<script src="rooms/mole.js?v=11061503"></script>
+<script src="rooms/keycap.js?v=11061503"></script>
+<script src="rooms/bugs.js?v=11061503"></script>
+<script src="rooms/bubble.js?v=11061503"></script>
+<script src="rooms/breath.js?v=11061503"></script>
+<script src="rooms/sand.js?v=11061503"></script>
+<script src="rooms/kinetic.js?v=11061503"></script>
+<script src="rooms/pet.js?v=11061503"></script>
+<script src="rooms/recycle.js?v=11061503"></script>
+<script src="rooms/judo.js?v=11061503"></script>
+<script src="rooms/wakeup.js?v=11061503"></script>
+<script src="rooms/weather.js?v=11061503"></script>
+<script src="rooms/wall.js?v=11061503"></script>
+<script src="rooms/meditation.js?v=11061503"></script>
+<script src="rooms/counsel.js?v=11061503"></script>
+<script src="rooms/wordchain.js?v=11061503"></script>
+<script src="rooms/gallery.js?v=11061503"></script>
+<script src="rooms/penalty.js?v=11061503"></script>
+<script src="rooms/freethrow.js?v=11061503"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="world.js?v=11051050"></script>
-<script src="multi.js?v=11051050"></script>
-<script src="js/init.js?v=11051050"></script>
+<script src="world.js?v=11061503"></script>
+<script src="multi.js?v=11061503"></script>
+<script src="js/init.js?v=11061503"></script>
 </body>
 </html>

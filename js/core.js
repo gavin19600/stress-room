@@ -120,6 +120,7 @@ H.buildHub=()=>{
     {no:'1F',name:'터뜨리는 방',desc:'세게 치고, 깨고, 갈아 버려요',c:'var(--f1)'},
     {no:'2F',name:'쉬어가는 방',desc:'천천히, 손끝으로 가라앉혀요',c:'var(--f2)'},
     {no:'3F',name:'함께하는 방',desc:'나누고, 쉬고, 숨 고르기',c:'var(--f3)'},
+    {no:'4F',name:'미술전시관',desc:'그리고, 걸고, 함께 감상해요',c:'#7b5cc4'},
     {no:'밖',name:'운동장',desc:'건물 밖, 운동장 옆에서 뛰어놀아요',c:'#4fa35a',key:0,plate:'야외'}];
   const host=document.getElementById('floors');host.innerHTML='';
   floors.forEach((f,fi)=>{const sec=document.createElement('section');sec.className='floor';sec.style.setProperty('--c',f.c);
